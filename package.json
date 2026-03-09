@@ -1,0 +1,58 @@
+{
+  "name": "tasknest",
+  "version": "1.0.0",
+  "description": "Desktop Todo Application with Subtasks",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
+    "dev:renderer": "webpack serve --mode development --config webpack.config.js",
+    "build:renderer": "webpack --mode production --config webpack.config.js",
+    "build": "npm run build:renderer && electron-builder --win",
+    "pack": "npm run build:renderer && electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.todo.app",
+    "productName": "TaskNest",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/main/**/*",
+      "dist/renderer/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "keywords": ["todo", "electron", "react"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron-log": "^5.4.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "babel-loader": "^10.1.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "css-loader": "^7.1.4",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1",
+    "html-webpack-plugin": "^5.6.6",
+    "style-loader": "^4.0.0",
+    "wait-on": "^9.0.4",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.3"
+  }
+}
