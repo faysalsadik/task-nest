@@ -49,18 +49,21 @@ function saveData(filename, data) {
 function createWindow() {
   log.info('Creating main window...');
   
+  const preloadPath = path.join(__dirname, 'preload.js');
+  log.info('Preload path:', preloadPath);
+  
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 700,
-    minWidth: 400,
-    minHeight: 500,
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: preloadPath
     },
     show: false,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#f5f6f8'
   });
 
   const isDev = process.env.NODE_ENV === 'development';
@@ -69,8 +72,16 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:3000');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/renderer/index.html'));
+    const indexPath = path.join(__dirname, '../dist/renderer/index.html');
+    log.info('Loading index from:', indexPath);
+    mainWindow.loadFile(indexPath).catch(err => {
+      log.error('Failed to load file:', err);
+    });
   }
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    log.error('Failed to load:', errorCode, errorDescription);
+  });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -180,6 +191,14 @@ ipcMain.handle('load-settings', () => {
 
 ipcMain.handle('save-settings', (event, settings) => {
   return saveData('settings.json', settings);
+});
+
+ipcMain.handle('load-columns', () => {
+  return loadData('columns.json');
+});
+
+ipcMain.handle('save-columns', (event, columns) => {
+  return saveData('columns.json', columns);
 });
 
 ipcMain.handle('export-data', async (event, data) => {

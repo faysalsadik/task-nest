@@ -6,17 +6,18 @@ function Sidebar({
   onSelectCategory, 
   onAddCategory,
   onDeleteCategory,
-  filterStatus,
-  onFilterStatusChange,
   filterPriority,
   onFilterPriorityChange,
-  getActiveTasksCount,
-  getCompletedTodayCount,
-  totalTasks
+  totalTasks,
+  columns,
+  onAddColumn,
+  onDeleteColumn
 }) {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [categoryColor, setCategoryColor] = useState('#4A90E2');
+  const [newColumnName, setNewColumnName] = useState('');
+  const [showAddColumn, setShowAddColumn] = useState(false);
 
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
@@ -26,12 +27,20 @@ function Sidebar({
     }
   };
 
+  const handleAddColumn = () => {
+    if (newColumnName.trim()) {
+      onAddColumn(newColumnName.trim());
+      setNewColumnName('');
+      setShowAddColumn(false);
+    }
+  };
+
   const colors = ['#4A90E2', '#27AE60', '#F39C12', '#E74C3C', '#9B59B6', '#1ABC9C', '#34495E', '#E91E63'];
 
   return (
     <aside className="sidebar">
       <div className="sidebar-section">
-        <h3>Tasks</h3>
+        <h3>All Tasks</h3>
         <ul className="category-list">
           <li 
             className={selectedCategory === 'all' ? 'active' : ''}
@@ -40,35 +49,6 @@ function Sidebar({
             <span className="category-icon">📋</span>
             All Tasks
             <span className="count">{totalTasks}</span>
-          </li>
-        </ul>
-      </div>
-
-      <div className="sidebar-section">
-        <h3>Status</h3>
-        <ul className="category-list">
-          <li 
-            className={filterStatus === 'all' ? 'active' : ''}
-            onClick={() => onFilterStatusChange('all')}
-          >
-            <span className="category-icon">☰</span>
-            All
-          </li>
-          <li 
-            className={filterStatus === 'active' ? 'active' : ''}
-            onClick={() => onFilterStatusChange('active')}
-          >
-            <span className="category-icon">○</span>
-            Active
-            <span className="count">{getActiveTasksCount()}</span>
-          </li>
-          <li 
-            className={filterStatus === 'completed' ? 'active' : ''}
-            onClick={() => onFilterStatusChange('completed')}
-          >
-            <span className="category-icon">✓</span>
-            Completed
-            <span className="count">{getCompletedTodayCount()}</span>
           </li>
         </ul>
       </div>
@@ -153,6 +133,35 @@ function Sidebar({
               >
                 ×
               </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="sidebar-section">
+        <h3>
+          Columns
+          <button className="add-btn" onClick={() => setShowAddColumn(!showAddColumn)}>+</button>
+        </h3>
+        
+        {showAddColumn && (
+          <div className="add-category-form">
+            <input
+              type="text"
+              placeholder="Column name"
+              value={newColumnName}
+              onChange={(e) => setNewColumnName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddColumn()}
+            />
+            <button onClick={handleAddColumn}>Add</button>
+          </div>
+        )}
+        
+        <ul className="category-list">
+          {columns.map(column => (
+            <li key={column.id}>
+              <span className="column-icon">▦</span>
+              {column.title}
             </li>
           ))}
         </ul>

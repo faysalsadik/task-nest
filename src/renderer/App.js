@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Sidebar from './components/Sidebar';
-import TaskList from './components/TaskList';
-import TaskDetails from './components/TaskDetails';
+import Board from './components/Board';
 import Header from './components/Header';
 import './styles/global.css';
-
-const { v4: uuidv4 } = window.uuid ? window.uuid : { v4: () => Math.random().toString(36).substr(2, 9) };
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [settings, setSettings] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedTask, setSelectedTask] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [showSettings, setShowSettings] = useState(false);
+  const [columns, setColumns] = useState([
+    { id: 'todo', title: 'To Do', order: 0 },
+    { id: 'inprogress', title: 'In Progress', order: 1 },
+    { id: 'done', title: 'Done', order: 2 }
+  ]);
+  const [draggedColumn, setDraggedColumn] = useState(null);
+  const [draggedTask, setDraggedTask] = useState(null);
   const saveTimeoutRef = useRef(null);
+
+  const { v4: uuidv4 } = { v4: () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36) };
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,10 +29,14 @@ function App() {
         const loadedTasks = await window.electronAPI.loadTasks();
         const loadedCategories = await window.electronAPI.loadCategories();
         const loadedSettings = await window.electronAPI.loadSettings();
+        const loadedColumns = await window.electronAPI.loadColumns();
         
         setTasks(loadedTasks || []);
         setCategories(loadedCategories || []);
         setSettings(loadedSettings);
+        if (loadedColumns && loadedColumns.length > 0) {
+          setColumns(loadedColumns);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -37,7 +45,6 @@ function App() {
     loadData();
     
     window.electronAPI.onAddTaskFromTray(() => {
-      setSelectedTask(null);
     });
   }, []);
 
@@ -59,17 +66,22 @@ function App() {
     setSettings(newSettings);
   }, []);
 
-  const addTask = useCallback((title, parentId = null) => {
+  const saveColumns = useCallback(async (newColumns) => {
+    await window.electronAPI.saveColumns(newColumns);
+  }, []);
+
+  const addTask = useCallback((title, status = 'todo') => {
+    const columnTasks = tasks.filter(t => t.status === status && !t.parentId);
     const newTask = {
       id: uuidv4(),
       title,
       description: '',
-      status: 'active',
+      status,
       priority: 'none',
       dueDate: null,
       categoryId: selectedCategory !== 'all' ? selectedCategory : null,
-      parentId,
-      order: tasks.filter(t => t.parentId === parentId).length,
+      parentId: null,
+      order: columnTasks.length,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       completedAt: null,
@@ -79,10 +91,6 @@ function App() {
     const newTasks = [...tasks, newTask];
     setTasks(newTasks);
     saveTasks(newTasks);
-    
-    if (!parentId) {
-      setSelectedTask(newTask);
-    }
     
     return newTask;
   }, [tasks, selectedCategory, saveTasks]);
@@ -96,11 +104,7 @@ function App() {
     });
     setTasks(newTasks);
     saveTasks(newTasks);
-    
-    if (selectedTask && selectedTask.id === taskId) {
-      setSelectedTask(prev => ({ ...prev, ...updates }));
-    }
-  }, [tasks, selectedTask, saveTasks]);
+  }, [tasks, saveTasks]);
 
   const deleteTask = useCallback((taskId) => {
     const deleteRecursive = (id) => {
@@ -116,20 +120,16 @@ function App() {
     const newTasks = tasks.filter(t => !idsToDelete.includes(t.id));
     setTasks(newTasks);
     saveTasks(newTasks);
-    
-    if (selectedTask && idsToDelete.includes(selectedTask.id)) {
-      setSelectedTask(null);
-    }
-  }, [tasks, selectedTask, saveTasks]);
+  }, [tasks, saveTasks]);
 
   const toggleComplete = useCallback((taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
     
-    const newStatus = task.status === 'completed' ? 'active' : 'completed';
+    const newStatus = task.status === 'done' ? 'todo' : 'done';
     const updates = {
       status: newStatus,
-      completedAt: newStatus === 'completed' ? new Date().toISOString() : null
+      completedAt: newStatus === 'done' ? new Date().toISOString() : null
     };
     
     const newTasks = tasks.map(t => {
@@ -142,9 +142,51 @@ function App() {
     saveTasks(newTasks);
   }, [tasks, saveTasks]);
 
-  const addSubtask = useCallback((parentId, title) => {
-    return addTask(title, parentId);
-  }, [addTask]);
+  const moveTask = useCallback((taskId, newStatus, newOrder) => {
+    let newTasks = tasks.map(t => {
+      if (t.id === taskId) {
+        return { 
+          ...t, 
+          status: newStatus, 
+          order: newOrder,
+          updatedAt: new Date().toISOString() 
+        };
+      }
+      return t;
+    });
+    
+    const tasksInColumn = newTasks.filter(t => t.status === newStatus && t.id !== taskId);
+    tasksInColumn.forEach((task, index) => {
+      if (index >= newOrder) {
+        task.order = index + 1;
+      }
+    });
+    
+    setTasks(newTasks);
+    saveTasks(newTasks);
+  }, [tasks, saveTasks]);
+
+  const getFilteredTasks = useCallback((status) => {
+    let filtered = tasks.filter(t => t.status === status && !t.parentId);
+    
+    if (filterPriority !== 'all') {
+      filtered = filtered.filter(t => t.priority === filterPriority);
+    }
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        (t.description && t.description.toLowerCase().includes(query))
+      );
+    }
+    
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(t => t.categoryId === selectedCategory);
+    }
+    
+    return filtered.sort((a, b) => a.order - b.order);
+  }, [tasks, selectedCategory, filterPriority, searchQuery]);
 
   const addCategory = useCallback((name, color) => {
     const newCategory = {
@@ -180,99 +222,77 @@ function App() {
     }
   }, [categories, tasks, selectedCategory, saveCategories, saveTasks]);
 
-  const moveTask = useCallback((taskId, newParentId, newOrder) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-    
-    let newTasks = tasks.map(t => {
-      if (t.id === taskId) {
-        return { 
-          ...t, 
-          parentId: newParentId, 
-          order: newOrder,
-          updatedAt: new Date().toISOString() 
-        };
-      }
-      return t;
-    });
-    
-    const siblings = newTasks.filter(t => t.parentId === newParentId && t.id !== taskId);
-    siblings.forEach((sibling, index) => {
-      if (index >= newOrder) {
-        sibling.order = index + 1;
-      }
-    });
-    
+  const addColumn = useCallback((title) => {
+    const newColumn = {
+      id: uuidv4(),
+      title,
+      order: columns.length
+    };
+    const newColumns = [...columns, newColumn];
+    setColumns(newColumns);
+    saveColumns(newColumns);
+  }, [columns, saveColumns]);
+
+  const deleteColumn = useCallback((columnId) => {
+    const newTasks = tasks.filter(t => t.status !== columnId);
     setTasks(newTasks);
     saveTasks(newTasks);
-  }, [tasks, saveTasks]);
-
-  const getFilteredTasks = useCallback(() => {
-    let filtered = [...tasks];
     
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(t => t.categoryId === selectedCategory);
-    }
-    
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(t => t.status === filterStatus);
-    }
-    
-    if (filterPriority !== 'all') {
-      filtered = filtered.filter(t => t.priority === filterPriority);
-    }
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const searchInTask = (task) => {
-        if (task.title.toLowerCase().includes(query)) return true;
-        if (task.description && task.description.toLowerCase().includes(query)) return true;
-        const children = tasks.filter(t => t.parentId === task.id);
-        return children.some(searchInTask);
-      };
-      filtered = filtered.filter(searchInTask);
-    }
-    
-    return filtered.filter(t => !t.parentId);
-  }, [tasks, selectedCategory, filterStatus, filterPriority, searchQuery]);
+    const newColumns = columns.filter(col => col.id !== columnId);
+    setColumns(newColumns);
+    saveColumns(newColumns);
+  }, [tasks, columns, saveTasks, saveColumns]);
 
-  const getTaskProgress = useCallback((taskId) => {
-    const subtasks = tasks.filter(t => t.parentId === taskId);
-    if (subtasks.length === 0) return null;
+  const handleColumnDragStart = (e, column) => {
+    setDraggedColumn(column);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleColumnDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleColumnDrop = (e, targetColumn) => {
+    e.preventDefault();
+    if (!draggedColumn || draggedColumn.id === targetColumn.id) return;
+
+    const draggedIndex = columns.findIndex(c => c.id === draggedColumn.id);
+    const targetIndex = columns.findIndex(c => c.id === targetColumn.id);
     
-    const completed = subtasks.filter(t => t.status === 'completed').length;
-    return { completed, total: subtasks.length };
-  }, [tasks]);
+    const newColumns = [...columns];
+    newColumns.splice(draggedIndex, 1);
+    newColumns.splice(targetIndex, 0, draggedColumn);
+    
+    newColumns.forEach((col, index) => {
+      col.order = index;
+    });
+    
+    setColumns(newColumns);
+    saveColumns(newColumns);
+    setDraggedColumn(null);
+  };
 
-  const getSubtasks = useCallback((parentId) => {
-    return tasks.filter(t => t.parentId === parentId).sort((a, b) => a.order - b.order);
-  }, [tasks]);
+  const handleTaskDragStart = (e, task, columnId) => {
+    setDraggedTask({ task, columnId });
+    e.dataTransfer.effectAllowed = 'move';
+  };
 
-  const getAllDescendants = useCallback((taskId) => {
-    const result = [];
-    const getChildren = (id) => {
-      const children = tasks.filter(t => t.parentId === id);
-      children.forEach(child => {
-        result.push(child);
-        getChildren(child.id);
-      });
-    };
-    getChildren(taskId);
-    return result;
-  }, [tasks]);
+  const handleTaskDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-  const getActiveTasksCount = useCallback(() => {
-    return tasks.filter(t => t.status === 'active' && !t.parentId).length;
-  }, [tasks]);
-
-  const getCompletedTodayCount = useCallback(() => {
-    const today = new Date().toDateString();
-    return tasks.filter(t => 
-      t.status === 'completed' && 
-      t.completedAt &&
-      new Date(t.completedAt).toDateString() === today
-    ).length;
-  }, [tasks]);
+  const handleTaskDrop = (e, targetColumnId) => {
+    e.preventDefault();
+    if (!draggedTask) return;
+    
+    const { task, columnId: sourceColumnId } = draggedTask;
+    const columnTasks = tasks.filter(t => t.status === targetColumnId && t.id !== task.id);
+    const newOrder = columnTasks.length;
+    
+    moveTask(task.id, targetColumnId, newOrder);
+    setDraggedTask(null);
+  };
 
   const theme = settings?.theme || 'light';
 
@@ -292,38 +312,31 @@ function App() {
           onSelectCategory={setSelectedCategory}
           onAddCategory={addCategory}
           onDeleteCategory={deleteCategory}
-          filterStatus={filterStatus}
-          onFilterStatusChange={setFilterStatus}
           filterPriority={filterPriority}
           onFilterPriorityChange={setFilterPriority}
-          getActiveTasksCount={getActiveTasksCount}
-          getCompletedTodayCount={getCompletedTodayCount}
           totalTasks={tasks.length}
+          columns={columns}
+          onAddColumn={addColumn}
+          onDeleteColumn={deleteColumn}
         />
         
-        <TaskList 
-          tasks={getFilteredTasks()}
-          getSubtasks={getSubtasks}
-          getTaskProgress={getTaskProgress}
-          selectedTask={selectedTask}
-          onSelectTask={setSelectedTask}
+        <Board 
+          columns={columns}
+          tasks={tasks}
+          getFilteredTasks={getFilteredTasks}
           onAddTask={addTask}
-          onToggleComplete={toggleComplete}
-          onDeleteTask={deleteTask}
-          onMoveTask={moveTask}
-          addSubtask={addSubtask}
-          getAllDescendants={getAllDescendants}
-        />
-        
-        <TaskDetails 
-          task={selectedTask}
-          categories={categories}
           onUpdateTask={updateTask}
           onDeleteTask={deleteTask}
-          onAddSubtask={addSubtask}
-          getSubtasks={getSubtasks}
-          getTaskProgress={getTaskProgress}
-          getAllDescendants={getAllDescendants}
+          onToggleComplete={toggleComplete}
+          onMoveTask={moveTask}
+          handleColumnDragStart={handleColumnDragStart}
+          handleColumnDragOver={handleColumnDragOver}
+          handleColumnDrop={handleColumnDrop}
+          draggedColumn={draggedColumn}
+          handleTaskDragStart={handleTaskDragStart}
+          handleTaskDragOver={handleTaskDragOver}
+          handleTaskDrop={handleTaskDrop}
+          draggedTask={draggedTask}
         />
       </div>
       
@@ -342,7 +355,6 @@ function App() {
                 >
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
-                  <option value="system">System</option>
                 </select>
               </label>
             </div>
@@ -357,20 +369,12 @@ function App() {
                 />
                 Confirm before delete
               </label>
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={settings.autoBackup}
-                  onChange={(e) => saveSettings({...settings, autoBackup: e.target.checked})}
-                />
-                Auto backup
-              </label>
             </div>
             
             <div className="settings-section">
               <h3>Data</h3>
               <button onClick={async () => {
-                const data = { tasks, categories, settings };
+                const data = { tasks, categories, settings, columns };
                 await window.electronAPI.exportData(data);
               }}>
                 Export Data
@@ -381,6 +385,7 @@ function App() {
                   if (data.tasks) setTasks(data.tasks);
                   if (data.categories) setCategories(data.categories);
                   if (data.settings) setSettings(data.settings);
+                  if (data.columns) setColumns(data.columns);
                 }
               }}>
                 Import Data
