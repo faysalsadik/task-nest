@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f0e6">
+    <meta name="description" content="A lightweight task management app">
     <title>TaskNest</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js');
+        }
+    </script>
     <style>
         * {
             margin: 0;
