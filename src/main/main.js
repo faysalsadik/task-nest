@@ -52,11 +52,15 @@ function createWindow() {
   const preloadPath = path.join(__dirname, 'preload.js');
   log.info('Preload path:', preloadPath);
   
+  const primaryDisplay = require('electron').screen.getPrimaryDisplay();
+  const { width: screenWidth } = primaryDisplay.workAreaSize;
+  const quarterWidth = Math.floor(screenWidth / 4);
+  
   mainWindow = new BrowserWindow({
-    width: 1200,
+    width: quarterWidth,
     height: 800,
-    minWidth: 800,
-    minHeight: 600,
+    minWidth: 280,
+    minHeight: 500,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
