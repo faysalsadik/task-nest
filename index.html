@@ -3,18 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f5f0e6">
-    <meta name="description" content="A lightweight task management app">
-    <title>TaskNest</title>
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="description" content="Minimal floating todo app">
+    <title>Tasky</title>
     <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="icon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./service-worker.js');
-        }
-    </script>
     <style>
         * {
             margin: 0;
@@ -23,432 +15,193 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg-gradient: #f5f0e6;
-            --card-bg: #fffef9;
-            --text-primary: #374151;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --border: #e5e0d8;
-            --success: #059669;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --subtle-bg: #f7f5f0;
-            --warning: #d97706;
-            --info: #2563eb;
-            --pink: #db2777;
-            --shadow: 0 4px 20px rgba(0,0,0,0.06);
-            --shadow-hover: 0 8px 30px rgba(0,0,0,0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg-gradient: #0f0f1a;
-            --card-bg: #1f2937;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border: #374151;
-            --subtle-bg: #111827;
-            --success-bg: #064e3b;
-            --success-bg-hover: #065f46;
-            --danger-bg: #7f1d1d;
-            --danger-bg-hover: #991b1b;
-            --header-text: white;
-            --header-btn-bg: rgba(255,255,255,0.15);
-            --header-btn-border: rgba(255,255,255,0.4);
-            --header-btn-hover: rgba(255,255,255,0.25);
-            --header-btn-border-hover: rgba(255,255,255,0.7);
-            --shadow: 0 10px 40px rgba(0,0,0,0.3);
-            --shadow-hover: 0 15px 50px rgba(0,0,0,0.4);
-        }
-
-        :root {
-            --header-text: #1f2937;
-            --header-btn-bg: rgba(0,0,0,0.05);
-            --header-btn-border: rgba(0,0,0,0.2);
-            --header-btn-hover: rgba(0,0,0,0.1);
-            --header-btn-border-hover: rgba(0,0,0,0.4);
-        }
-
-        [data-theme="dark"] {
-            --header-text: white;
-            --header-btn-bg: rgba(255,255,255,0.15);
-            --header-btn-border: rgba(255,255,255,0.4);
-            --header-btn-hover: rgba(255,255,255,0.25);
-            --header-btn-border-hover: rgba(255,255,255,0.7);
+            --bg: #0a0a0a;
+            --card: #1a1a1a;
+            --card-hover: #252525;
+            --border: #333333;
+            --text: #e8e8e8;
+            --text-muted: #888888;
+            --accent: #ffffff;
+            --accent-hover: #e0e0e0;
+            --success: #ffffff;
+            --warning: #bbbbbb;
+            --danger: #ffffff;
+            --pin-active: #ffffff;
+            --pin-inactive: #666666;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-gradient);
+            background: var(--bg);
             min-height: 100vh;
-            padding: 20px;
+            color: var(--text);
             overflow: hidden;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 40px);
         }
 
-        .app-header {
+        .titlebar {
+            height: 36px;
+            background: var(--bg);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
             padding: 0 8px;
+            -webkit-app-region: drag;
             flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .app-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--header-text);
-            text-shadow: none;
-        }
-
-        .btn-add-category {
-            padding: 10px 20px;
-            background: var(--header-btn-bg);
-            color: var(--header-text);
-            border: 2px dashed var(--header-btn-border);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
+        .titlebar-left {
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .btn-add-category:hover {
-            background: var(--header-btn-hover);
-            border-color: var(--header-btn-border-hover);
-        }
-
-        .categories-container {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
             flex: 1;
-            align-content: flex-start;
-            overflow-y: auto;
-            height: calc(100vh - 120px);
-            scrollbar-width: none;
-            -ms-overflow-style: none;
         }
 
-        .categories-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .category-column {
-            background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 0;
-            transition: all 0.3s;
-        }
-
-        .category-column:hover {
-            box-shadow: var(--shadow-hover);
-        }
-
-        @media (min-width: 1200px) {
-            .categories-container .category-column {
-                flex: 1 1 calc(33.333% - 16px);
-                min-width: 280px;
-                max-width: calc(33.333% - 16px);
-                min-height: 500px;
-                height: 60vh;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1199px) {
-            .categories-container .category-column {
-                flex: 1 1 calc(33.333% - 16px);
-                min-width: 280px;
-                max-width: calc(33.333% - 16px);
-                min-height: 400px;
-                height: 55vh;
-            }
-        }
-
-        @media (max-width: 768px) {
-        body {
-            overflow: hidden;
-        }
-
-        .categories-container {
-                flex-direction: column;
-                flex-wrap: nowrap;
-                overflow-y: auto;
-                height: calc(100vh - 140px);
-            }
-
-            .categories-container .category-column {
-                min-height: 300px;
-                flex: none;
-                width: 100%;
-                max-width: 100%;
-                height: 45vh;
-            }
-
-            .task-actions {
-                opacity: 1 !important;
-                visibility: visible !important;
-            }
-
-            .btn-delete-subtask {
-                opacity: 1 !important;
-            }
-
-            .container {
-                height: auto;
-                max-height: calc(100vh - 40px);
-                overflow: hidden;
-            }
-
-            .categories-container {
-                flex-direction: column;
-                flex-wrap: nowrap;
-                overflow-y: auto;
-                overflow-x: hidden;
-                height: calc(100vh - 140px);
-            }
-
-            .app-header {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .app-header h1 {
-                font-size: 1.5rem;
-            }
-
-            .app-header > div {
-                display: flex;
-                gap: 8px !important;
-            }
-
-            .btn-add-category {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-
-            .btn-add-category svg.desktop-only {
-                display: none !important;
-            }
-
-            .btn-add-category svg.mobile-only {
-                display: inline-block !important;
-                margin-right: 4px;
-            }
-
-            .btn-add-category .btn-text {
-                display: inline !important;
-            }
-        }
-
-        .category-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+        .titlebar-right {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
+            gap: 2px;
+            -webkit-app-region: no-drag;
         }
 
-        .category-title-wrap {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .category-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 4px;
-        }
-
-        .category-title {
-            font-size: 1.1rem;
+        .app-title {
+            font-size: 0.8rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
 
-        .category-count {
-            background: var(--subtle-bg);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .category-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
+        .titlebar-btn {
+            width: 28px;
+            height: 28px;
             border: none;
-            border-radius: 8px;
+            background: transparent;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            background: transparent;
+            transition: all 0.15s;
             color: var(--text-muted);
         }
 
-        .btn-icon:hover {
-            background: var(--subtle-bg);
-            color: var(--text-primary);
+        .titlebar-btn:hover {
+            background: var(--card);
         }
 
-        .btn-icon.delete:hover {
-            background: #fef2f2;
-            color: var(--danger);
+        .titlebar-btn.pin {
+            color: var(--pin-inactive);
         }
 
-        [data-theme="dark"] .btn-icon.delete:hover {
-            background: var(--danger-bg);
+        .titlebar-btn.pin.active {
+            color: var(--pin-active);
         }
 
-        .category-input-area {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
+        .titlebar-btn.close:hover {
+            background: var(--danger);
+            color: white;
         }
 
-        .input-group {
+        .container {
+            flex: 1;
             display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 12px;
             gap: 8px;
         }
 
-        .input-group input {
+        .input-area {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .task-input {
             flex: 1;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.9rem;
+            padding: 10px 12px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.85rem;
             font-family: inherit;
-            transition: all 0.2s;
-            background: var(--card-bg);
-            color: var(--text-primary);
-        }
-
-        .input-group input:focus {
             outline: none;
-            border-color: var(--primary);
+            transition: border-color 0.15s;
         }
 
-        .input-group input::placeholder {
+        .task-input:focus {
+            border-color: var(--accent);
+        }
+
+        .task-input::placeholder {
             color: var(--text-muted);
         }
 
         .btn-add {
-            padding: 12px 20px;
-            background: transparent;
-            color: var(--text-primary);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 10px 14px;
+            background: #404040;
+            border: 1px solid #555555;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
+            transition: all 0.15s;
         }
 
         .btn-add:hover {
-            background: var(--border);
-            color: var(--text-primary);
+            background: #555555;
         }
 
         .task-list {
-            list-style: none;
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .task-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .task-list::-webkit-scrollbar-track {
-            background: transparent;
+            width: 4px;
         }
 
         .task-list::-webkit-scrollbar-thumb {
             background: var(--border);
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
-        .task-list::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
+        .task-card {
+            background: var(--card);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.15s;
         }
 
-        .task {
-            background: var(--subtle-bg);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            transition: all 0.2s;
-            animation: slideIn 0.3s ease;
+        .task-card:hover {
+            background: var(--card-hover);
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .task-card.completed {
+            opacity: 0.5;
         }
 
-        .task:hover {
-            background: var(--border);
-        }
-
-        .task.completed {
-            opacity: 0.6;
-        }
-
-        .task.completed .task-title {
-            text-decoration: line-through;
-            color: var(--text-muted);
-        }
-
-        .task-header {
+        .task-main {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
-            gap: 12px;
+            padding: 10px 12px;
+            gap: 10px;
         }
 
-        .checkbox-wrapper {
+        .checkbox {
             position: relative;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
         }
 
-        .checkbox-wrapper input {
+        .checkbox input {
             position: absolute;
             opacity: 0;
             width: 100%;
@@ -461,485 +214,572 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 20px;
-            height: 20px;
-            background: var(--card-bg);
+            width: 18px;
+            height: 18px;
+            background: var(--card);
             border: 2px solid var(--border);
-            border-radius: 6px;
-            transition: all 0.2s;
+            border-radius: 5px;
+            transition: all 0.15s;
         }
 
-        .checkbox-wrapper input:checked ~ .checkmark {
-            background: var(--success);
-            border-color: var(--success);
+        .checkbox input:checked ~ .checkmark {
+            background: #666666;
+            border-color: #666666;
         }
 
         .checkmark::after {
             content: '';
             position: absolute;
             display: none;
-            left: 6px;
-            top: 2px;
+            left: 5px;
+            top: 1px;
             width: 4px;
-            height: 8px;
+            height: 7px;
             border: solid white;
             border-width: 0 2px 2px 0;
             transform: rotate(45deg);
         }
 
-        .checkbox-wrapper input:checked ~ .checkmark::after {
+        .checkbox input:checked ~ .checkmark::after {
             display: block;
         }
 
         .task-title {
             flex: 1;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--text);
         }
 
-        .task-actions {
-            display: flex;
-            gap: 4px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
-        }
-
-        .task:hover .task-actions {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-subtask {
-            background: transparent;
-            color: var(--text-muted);
-            padding: 6px;
-        }
-
-        .btn-subtask:hover {
-            background: #ecfdf5;
-            color: var(--success);
-        }
-
-        [data-theme="dark"] .btn-subtask:hover {
-            background: var(--success-bg);
-        }
-
-        .btn-delete {
-            background: transparent;
-            color: var(--text-muted);
-            padding: 6px;
-        }
-
-        .btn-delete:hover {
-            background: #fef2f2;
-            color: var(--danger);
-        }
-
-        [data-theme="dark"] .btn-delete:hover {
-            background: var(--danger-bg);
-        }
-
-        .subtask-section {
-            padding: 0 16px 12px 48px;
-        }
-
-        .subtask-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .subtask {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--card-bg);
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .subtask-checkbox-wrapper {
-            position: relative;
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-
-        .subtask-checkbox-wrapper input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            z-index: 1;
-        }
-
-        .subtask-checkmark {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 20px;
-            height: 20px;
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .subtask-checkbox-wrapper input:checked ~ .subtask-checkmark {
-            background: var(--success);
-            border-color: var(--success);
-        }
-
-        .subtask-checkmark::after {
-            content: '';
-            position: absolute;
-            display: none;
-            left: 6px;
-            top: 2px;
-            width: 4px;
-            height: 8px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        .subtask-checkbox-wrapper input:checked ~ .subtask-checkmark::after {
-            display: block;
-        }
-
-        .subtask.completed .subtask-title {
+        .task-card.completed .task-title {
             text-decoration: line-through;
             color: var(--text-muted);
         }
 
-        .subtask.completed {
-            opacity: 0.6;
+        .task-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
         }
 
-        .subtask-checkbox {
+        .tag {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #404040;
+            border: 1px solid #555555;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-remove {
+            width: 12px;
+            height: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888888;
+            padding: 0;
+            border-radius: 2px;
+        }
+
+        .tag-remove:hover {
+            background: #555555;
+            color: #ffffff;
+        }
+
+        .add-tag-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            max-width: 160px;
+        }
+
+        .tag-input {
+            width: 80px;
+            padding: 4px 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 0.7rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .tag-input:focus {
+            border-color: var(--accent);
+        }
+
+        .tag-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-add-tag {
+            padding: 4px 10px;
+            background: #404040;
+            border: 1px solid #555555;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-add-tag:hover {
+            background: #555555;
+        }
+
+        .deadline-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--border);
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .deadline-badge.soon {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .deadline-badge.overdue {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .deadline-badge.today {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .task-expand {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .task-expand:hover {
+            background: var(--border);
+        }
+
+        .task-expand svg {
+            transition: transform 0.2s;
+        }
+
+        .task-expand.expanded svg {
+            transform: rotate(180deg);
+        }
+
+        .task-delete {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .task-card:hover .task-delete {
+            opacity: 1;
+        }
+
+        .task-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .task-details {
             display: none;
+            padding: 0 12px 12px;
+        }
+
+        .task-details.visible {
+            display: block;
+        }
+
+        .details-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.8rem;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .details-textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .details-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .deadline-input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .deadline-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .deadline-input {
+            padding: 6px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.75rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .deadline-input:focus {
+            border-color: var(--accent);
+        }
+
+        .subtasks-section {
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        .subtasks-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .subtask-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .subtask-item .checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .subtask-item .checkmark {
+            width: 16px;
+            height: 16px;
+        }
+
+        .subtask-item input:checked ~ .checkmark {
+            background: #666666;
+            border-color: #666666;
+        }
+
+        .subtask-item .checkmark::after {
+            left: 4px;
+            top: 1px;
+            width: 3px;
+            height: 6px;
         }
 
         .subtask-title {
             flex: 1;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-        }
-
-        .btn-delete-subtask {
-            padding: 4px;
-            background: transparent;
-            color: var(--text-muted);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .subtask:hover .btn-delete-subtask {
-            opacity: 1;
-        }
-
-        .btn-delete-subtask:hover {
-            color: var(--danger);
-            background: #fef2f2;
-        }
-
-        [data-theme="dark"] .btn-delete-subtask:hover {
-            background: var(--danger-bg);
-        }
-
-        .subtask-input-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .subtask-input-group input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            background: var(--card-bg);
-            color: var(--text-primary);
-        }
-
-        .subtask-input-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .subtask-input-group input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .subtask-input-group .btn-add {
-            padding: 8px 14px;
             font-size: 0.8rem;
         }
 
-        .empty-category {
-            padding: 40px 20px;
-            text-align: center;
+        .subtask-item.completed .subtask-title {
+            text-decoration: line-through;
             color: var(--text-muted);
         }
 
-        .empty-category svg {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 12px;
-            opacity: 0.5;
+        .subtask-deadline {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: var(--border);
+            color: var(--text-muted);
         }
 
-        .add-category-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+        .subtask-deadline.soon {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .subtask-deadline.overdue {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .subtask-deadline.today {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .subtask-delete {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            border-radius: 3px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            color: var(--text-muted);
             opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s;
+            transition: all 0.15s;
         }
 
-        .add-category-modal.active {
+        .subtask-item:hover .subtask-delete {
             opacity: 1;
-            visibility: visible;
         }
 
-        .modal-content {
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 400px;
-            transform: scale(0.9);
+        .subtask-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .subtask-expand {
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: all 0.15s;
+        }
+
+        .subtask-item:hover .subtask-expand {
+            opacity: 1;
+        }
+
+        .subtask-expand:hover {
+            background: var(--border);
+        }
+
+        .subtask-expand svg {
             transition: transform 0.2s;
-            color: var(--text-primary);
         }
 
-        .add-category-modal.active .modal-content {
-            transform: scale(1);
+        .subtask-expand.expanded svg {
+            transform: rotate(180deg);
         }
 
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text-primary);
+        .subtask-details {
+            padding: 0 8px 8px 32px;
         }
 
-        #newCategoryName::placeholder {
+        .subtask-details-textarea {
+            min-height: 50px;
+            font-size: 0.75rem;
+        }
+
+        .add-subtask-group {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .subtask-input {
+            flex: 1;
+            padding: 6px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text);
+            font-size: 0.75rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .subtask-input:focus {
+            border-color: var(--accent);
+        }
+
+        .subtask-input::placeholder {
             color: var(--text-muted);
         }
 
-        .color-options {
+        .btn-add-subtask {
+            padding: 4px 6px;
+            background: #404040;
+            border: 1px solid #555555;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
             display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-add-subtask:hover {
+            background: #555555;
+        }
+
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
             gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
         }
 
-        .color-option {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
+        .empty-state svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.4;
         }
 
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
-        .color-option.selected {
-            border-color: var(--text-primary);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .btn-cancel {
-            padding: 10px 20px;
-            background: var(--subtle-bg);
-            color: var(--text-primary);
-            border: none;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .btn-cancel:hover {
-            background: var(--border);
+        .empty-state p {
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="app-header">
-            <h1>TaskNest</h1>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-add-category" onclick="toggleTheme()" id="themeToggle">
-                </button>
-                <button class="btn-add-category" onclick="showAddCategoryModal()">
-                    <svg class="desktop-only" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <svg class="mobile-only" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span class="btn-text">Add Category</span>
-                </button>
-            </div>
-        </header>
-
-        <div class="categories-container" id="categoriesContainer"></div>
-    </div>
-
-    <div class="add-category-modal" id="addCategoryModal">
-        <div class="modal-content">
-            <h3 class="modal-title">New Category</h3>
-            <input type="text" id="newCategoryName" placeholder="Category name..." style="width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:10px;font-size:1rem;margin-bottom:16px;background:var(--card-bg);color:var(--text-primary)">
-            <div class="color-options" id="colorOptions"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="hideAddCategoryModal()">Cancel</button>
-                <button class="btn-add" onclick="addCategory()">Add</button>
-            </div>
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <span class="app-title">Tasky</span>
+        </div>
+        <div class="titlebar-right">
+            <button class="titlebar-btn pin" id="pinBtn" title="Toggle always on top">
+                <svg id="pinIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                </svg>
+            </button>
+            <button class="titlebar-btn" id="minimizeBtn" title="Minimize">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+            <button class="titlebar-btn close" id="closeBtn" title="Close">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
     </div>
 
+    <div class="container">
+        <div class="input-area">
+            <input type="text" class="task-input" id="taskInput" placeholder="Add a task..." onkeypress="if(event.key==='Enter')addTask()">
+            <button class="btn-add" onclick="addTask()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="task-list" id="taskList"></div>
+    </div>
+
     <script>
-        const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#ef4444', '#8b5cf6', '#14b8a6'];
-        let selectedColor = COLORS[0];
-
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-        }
-
-        function updateThemeIcon(theme) {
-            const btn = document.getElementById('themeToggle');
-            if (theme === 'dark') {
-                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-            } else {
-                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-            }
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-
-        let data = JSON.parse(localStorage.getItem('todoData')) || {
-            categories: [{ id: 1, name: 'Personal', color: COLORS[0] }],
-            tasks: {}
-        };
-
-        if (Object.keys(data.tasks).length === 0) {
-            data.tasks[1] = [];
-        }
+        let data = JSON.parse(localStorage.getItem('taskyData')) || { tasks: [] };
+        let isPinned = localStorage.getItem('taskyPinned') !== 'false';
 
         function saveData() {
-            localStorage.setItem('todoData', JSON.stringify(data));
+            localStorage.setItem('taskyData', JSON.stringify(data));
         }
 
-        function renderColorOptions() {
-            const container = document.getElementById('colorOptions');
-            container.innerHTML = COLORS.map(color => `
-                <div class="color-option ${color === selectedColor ? 'selected' : ''}" 
-                     style="background:${color}" 
-                     onclick="selectColor('${color}')"></div>
-            `).join('');
-        }
-
-        function selectColor(color) {
-            selectedColor = color;
-            renderColorOptions();
-        }
-
-        function showAddCategoryModal() {
-            selectedColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-            renderColorOptions();
-            document.getElementById('newCategoryName').value = '';
-            document.getElementById('addCategoryModal').classList.add('active');
-            setTimeout(() => document.getElementById('newCategoryName').focus(), 100);
-        }
-
-        function hideAddCategoryModal() {
-            document.getElementById('addCategoryModal').classList.remove('active');
-        }
-
-        function addCategory() {
-            const name = document.getElementById('newCategoryName').value.trim();
-            if (!name) return;
-
-            const id = Date.now();
-            data.categories.push({ id, name, color: selectedColor });
-            data.tasks[id] = [];
-            saveData();
-            hideAddCategoryModal();
-            render();
-        }
-
-        function deleteCategory(id) {
-            if (data.categories.length <= 1) {
-                alert('Cannot delete the last category');
-                return;
+        function updatePinUI() {
+            const pinBtn = document.getElementById('pinBtn');
+            const pinIcon = document.getElementById('pinIcon');
+            if (isPinned) {
+                pinBtn.classList.add('active');
+                pinBtn.title = 'Unpin window';
+                if (pinIcon) {
+                    pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+                }
+            } else {
+                pinBtn.classList.remove('active');
+                pinBtn.title = 'Pin window';
+                if (pinIcon) {
+                    pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+                }
             }
-            if (!confirm('Delete this category and all its tasks?')) return;
-            
-            data.categories = data.categories.filter(c => c.id !== id);
-            delete data.tasks[id];
-            saveData();
-            render();
         }
 
-        function addTask(categoryId) {
-            const input = document.getElementById(`taskInput-${categoryId}`);
+        function formatDeadline(dateStr) {
+            if (!dateStr) return null;
+            const date = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const deadline = new Date(date);
+            deadline.setHours(0, 0, 0, 0);
+
+            const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+
+            if (diff < 0) return { text: 'Overdue', class: 'overdue' };
+            if (diff === 0) return { text: 'Today', class: 'today' };
+            if (diff <= 3) return { text: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), class: 'soon' };
+            return { text: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), class: '' };
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
             const title = input.value.trim();
             if (!title) return;
 
-            data.tasks[categoryId].unshift({
+            data.tasks.unshift({
                 id: Date.now(),
-                title: title,
+                title,
+                details: '',
+                deadline: '',
+                tags: [],
                 completed: false,
+                expanded: false,
                 subtasks: []
             });
             input.value = '';
@@ -947,8 +787,8 @@
             render();
         }
 
-        function toggleTask(categoryId, taskId) {
-            const task = data.tasks[categoryId].find(t => t.id === taskId);
+        function toggleTask(id) {
+            const task = data.tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
                 saveData();
@@ -956,14 +796,54 @@
             }
         }
 
-        function deleteTask(categoryId, taskId) {
-            data.tasks[categoryId] = data.tasks[categoryId].filter(t => t.id !== taskId);
+        function deleteTask(id) {
+            data.tasks = data.tasks.filter(t => t.id !== id);
             saveData();
             render();
         }
 
-        function toggleSubtask(categoryId, taskId, subtaskId) {
-            const task = data.tasks[categoryId].find(t => t.id === taskId);
+        function toggleExpand(id) {
+            const task = data.tasks.find(t => t.id === id);
+            if (task) {
+                task.expanded = !task.expanded;
+                saveData();
+                render();
+            }
+        }
+
+        function updateTaskDetails(id, field, value) {
+            const task = data.tasks.find(t => t.id === id);
+            if (task) {
+                task[field] = value;
+                saveData();
+            }
+        }
+
+        function addSubtask(taskId) {
+            const input = document.getElementById(`subtask-input-${taskId}`);
+            if (!input) return;
+            const title = input.value.trim();
+            if (!title) return;
+
+            const task = data.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.subtasks.push({
+                    id: Date.now(),
+                    title,
+                    details: '',
+                    deadline: '',
+                    tags: [],
+                    completed: false,
+                    expanded: false
+                });
+                input.value = '';
+                saveData();
+                render();
+            }
+        }
+
+        function toggleSubtask(taskId, subtaskId) {
+            const task = data.tasks.find(t => t.id === taskId);
             if (task) {
                 const subtask = task.subtasks.find(s => s.id === subtaskId);
                 if (subtask) {
@@ -974,8 +854,8 @@
             }
         }
 
-        function deleteSubtask(categoryId, taskId, subtaskId) {
-            const task = data.tasks[categoryId].find(t => t.id === taskId);
+        function deleteSubtask(taskId, subtaskId) {
+            const task = data.tasks.find(t => t.id === taskId);
             if (task) {
                 task.subtasks = task.subtasks.filter(s => s.id !== subtaskId);
                 saveData();
@@ -983,173 +863,282 @@
             }
         }
 
-        function addSubtaskInput(categoryId, taskId) {
-            const task = data.tasks[categoryId].find(t => t.id === taskId);
-            if (!task) return;
-
-            const existingInput = document.getElementById(`subtask-input-${taskId}`);
-            if (existingInput) {
-                existingInput.focus();
-                return;
+        function toggleSubtaskExpand(taskId, subtaskId) {
+            const task = data.tasks.find(t => t.id === taskId);
+            if (task) {
+                const subtask = task.subtasks.find(s => s.id === subtaskId);
+                if (subtask) {
+                    subtask.expanded = !subtask.expanded;
+                    saveData();
+                    render();
+                }
             }
-
-            task.showSubtaskInput = true;
-            render();
-            
-            setTimeout(() => {
-                const input = document.getElementById(`subtask-input-${taskId}`);
-                if (input) input.focus();
-            }, 0);
         }
 
-        function submitSubtask(categoryId, taskId) {
-            const input = document.getElementById(`subtask-input-${taskId}`);
-            const title = input.value.trim();
-            if (!title) return;
-
-            const task = data.tasks[categoryId].find(t => t.id === taskId);
+        function updateSubtaskDetails(taskId, subtaskId, field, value) {
+            const task = data.tasks.find(t => t.id === taskId);
             if (task) {
-                task.subtasks.push({
-                    id: Date.now(),
-                    title: title,
-                    completed: false
-                });
-                task.showSubtaskInput = false;
-                saveData();
-                render();
+                const subtask = task.subtasks.find(s => s.id === subtaskId);
+                if (subtask) {
+                    subtask[field] = value;
+                    saveData();
+                }
+            }
+        }
+
+        function addTag(taskId, isSubtask = false, subtaskId = null) {
+            const input = document.getElementById(`tag-input-${taskId}${isSubtask ? '-' + subtaskId : ''}`);
+            if (!input) return;
+            const tag = input.value.trim();
+            if (!tag) return;
+
+            const task = data.tasks.find(t => t.id === taskId);
+            if (task) {
+                if (isSubtask && subtaskId !== null) {
+                    const subtask = task.subtasks.find(s => s.id === subtaskId);
+                    if (subtask) {
+                        if (!subtask.tags) subtask.tags = [];
+                        if (!subtask.tags.includes(tag)) {
+                            subtask.tags.push(tag);
+                            input.value = '';
+                            saveData();
+                            render();
+                        }
+                    }
+                } else {
+                    if (!task.tags) task.tags = [];
+                    if (!task.tags.includes(tag)) {
+                        task.tags.push(tag);
+                        input.value = '';
+                        saveData();
+                        render();
+                    }
+                }
+            }
+        }
+
+        function removeTag(taskId, tag, isSubtask = false, subtaskId = null) {
+            const task = data.tasks.find(t => t.id === taskId);
+            if (task) {
+                if (isSubtask && subtaskId !== null) {
+                    const subtask = task.subtasks.find(s => s.id === subtaskId);
+                    if (subtask && subtask.tags) {
+                        subtask.tags = subtask.tags.filter(t => t !== tag);
+                        saveData();
+                        render();
+                    }
+                } else {
+                    if (task.tags) {
+                        task.tags = task.tags.filter(t => t !== tag);
+                        saveData();
+                        render();
+                    }
+                }
             }
         }
 
         function render() {
-            const container = document.getElementById('categoriesContainer');
-            container.innerHTML = '';
+            const list = document.getElementById('taskList');
 
-            data.categories.forEach(category => {
-                const tasks = data.tasks[category.id] || [];
-                const completedCount = tasks.filter(t => t.completed).length;
-                const column = document.createElement('div');
-                column.className = 'category-column';
-                column.innerHTML = `
-                    <div class="category-header">
-                        <div class="category-title-wrap">
-                            <div class="category-color" style="background:${category.color}"></div>
-                            <span class="category-title">${escapeHtml(category.name)}</span>
-                            <span class="category-count">${completedCount}/${tasks.length}</span>
-                        </div>
-                        <div class="category-actions">
-                            <button class="btn-icon delete" onclick="deleteCategory(${category.id})" title="Delete category">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+            if (data.tasks.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <p>No tasks yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = data.tasks.map(task => {
+                const deadlineInfo = formatDeadline(task.deadline);
+                const subtasksHtml = task.subtasks.map(st => {
+                    const stDeadline = formatDeadline(st.deadline);
+                    return `
+                        <div class="subtask-item ${st.completed ? 'completed' : ''}">
+                            <label class="checkbox">
+                                <input type="checkbox" ${st.completed ? 'checked' : ''} onchange="toggleSubtask(${task.id}, ${st.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                            <span class="subtask-title">${escapeHtml(st.title)}</span>
+                            ${stDeadline ? `<span class="subtask-deadline ${stDeadline.class}">${stDeadline.text}</span>` : ''}
+                            <button class="subtask-expand ${st.expanded ? 'expanded' : ''}" onclick="toggleSubtaskExpand(${task.id}, ${st.id})">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <button class="subtask-delete" onclick="deleteSubtask(${task.id}, ${st.id})">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
                             </button>
                         </div>
-                    </div>
-                    <div class="category-input-area">
-                        <div class="input-group">
-                            <input type="text" id="taskInput-${category.id}" placeholder="Add task..." 
-                                onkeypress="if(event.key==='Enter')addTask(${category.id})">
-                            <button class="btn-add" onclick="addTask(${category.id})">Add</button>
-                        </div>
-                    </div>
-                    <ul class="task-list" id="taskList-${category.id}"></ul>
-                `;
-                container.appendChild(column);
-
-                const taskList = column.querySelector(`#taskList-${category.id}`);
-                
-                if (tasks.length === 0) {
-                    taskList.innerHTML = `
-                        <div class="empty-category">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            <p>No tasks yet</p>
-                        </div>
-                    `;
-                } else {
-                    tasks.forEach(task => {
-                        const taskEl = document.createElement('li');
-                        taskEl.className = `task ${task.completed ? 'completed' : ''}`;
-                        
-                        let subtasksHtml = '';
-                        if (task.subtasks.length > 0) {
-                            subtasksHtml = `
-                                <div class="subtask-section">
-                                    <ul class="subtask-list">
-                                        ${task.subtasks.map(subtask => `
-                                            <li class="subtask ${subtask.completed ? 'completed' : ''}">
-                                                <label class="subtask-checkbox-wrapper">
-                                                    <input type="checkbox" class="subtask-checkbox" 
-                                                        ${subtask.completed ? 'checked' : ''} 
-                                                        onchange="toggleSubtask(${category.id}, ${task.id}, ${subtask.id})">
-                                                    <span class="subtask-checkmark"></span>
-                                                </label>
-                                                <span class="subtask-title">${escapeHtml(subtask.title)}</span>
-                                                <button class="btn-delete-subtask" onclick="deleteSubtask(${category.id}, ${task.id}, ${subtask.id})">
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                    </svg>
-                                                </button>
-                                            </li>
-                                        `).join('')}
-                                    </ul>
+                        ${st.expanded ? `
+                            <div class="subtask-details">
+                                <textarea class="details-textarea subtask-details-textarea" placeholder="Add details..."
+                                    onchange="updateSubtaskDetails(${task.id}, ${st.id}, 'details', this.value)">${escapeHtml(st.details || '')}</textarea>
+                                <div class="meta-row">
+                                <div class="deadline-input-group">
+                                    <span class="deadline-label">Due:</span>
+                                    <input type="date" class="deadline-input" value="${st.deadline || ''}"
+                                        onchange="updateSubtaskDetails(${task.id}, ${st.id}, 'deadline', this.value)">
                                 </div>
-                            `;
-                        }
-
-                        let subtaskInputHtml = '';
-                        if (task.showSubtaskInput) {
-                            subtaskInputHtml = `
-                                <div class="subtask-section">
-                                    <div class="subtask-input-group">
-                                        <input type="text" id="subtask-input-${task.id}" placeholder="Add subtask..." 
-                                            onkeypress="if(event.key==='Enter')submitSubtask(${category.id}, ${task.id})">
-                                        <button class="btn-add" onclick="submitSubtask(${category.id}, ${task.id})">Add</button>
-                                    </div>
-                                </div>
-                            `;
-                        }
-
-                        taskEl.innerHTML = `
-                            <div class="task-header">
-                                <label class="checkbox-wrapper">
-                                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${category.id}, ${task.id})">
-                                    <span class="checkmark"></span>
-                                </label>
-                                <span class="task-title">${escapeHtml(task.title)}</span>
-                                <div class="task-actions">
-                                    <button class="btn btn-subtask" onclick="addSubtaskInput(${category.id}, ${task.id})">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
-                                    </button>
-                                    <button class="btn btn-delete" onclick="deleteTask(${category.id}, ${task.id})">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-                                        </svg>
-                                    </button>
+                                <div class="add-tag-group">
+                                    <input type="text" class="tag-input" id="tag-input-${task.id}-${st.id}" placeholder="Add tag..."
+                                        onkeypress="if(event.key==='Enter'){event.preventDefault();addTag(${task.id}, true, ${st.id})}">
+                                    <button class="btn-add-tag" onclick="addTag(${task.id}, true, ${st.id})">Tag</button>
                                 </div>
                             </div>
-                            ${subtasksHtml}
-                            ${subtaskInputHtml}
-                        `;
-                        taskList.appendChild(taskEl);
-                    });
-                }
-            });
+                            ${st.tags && st.tags.length > 0 ? `
+                                <div class="task-tags" style="margin-top:6px;">
+                                    ${st.tags.map(tag => `
+                                        <span class="tag">
+                                            ${escapeHtml(tag)}
+                                            <button class="tag-remove" onclick="removeTag(${task.id}, '${escapeHtml(tag)}', true, ${st.id})">
+                                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            </div>
+                        ` : ''}
+                    `;
+                }).join('');
+
+                return `
+                    <div class="task-card ${task.completed ? 'completed' : ''}">
+                        <div class="task-main">
+                            <label class="checkbox">
+                                <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                            <span class="task-title">${escapeHtml(task.title)}</span>
+                            ${deadlineInfo ? `<span class="deadline-badge ${deadlineInfo.class}">${deadlineInfo.text}</span>` : ''}
+                            <button class="task-expand ${task.expanded ? 'expanded' : ''}" onclick="toggleExpand(${task.id})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <button class="task-delete" onclick="deleteTask(${task.id})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="task-details ${task.expanded ? 'visible' : ''}">
+                            <textarea class="details-textarea" placeholder="Add details..."
+                                onchange="updateTaskDetails(${task.id}, 'details', this.value)">${escapeHtml(task.details || '')}</textarea>
+                            <div class="meta-row">
+                                <div class="deadline-input-group">
+                                    <span class="deadline-label">Due:</span>
+                                    <input type="date" class="deadline-input" value="${task.deadline || ''}"
+                                        onchange="updateTaskDetails(${task.id}, 'deadline', this.value)">
+                                </div>
+                                <div class="add-tag-group">
+                                    <input type="text" class="tag-input" id="tag-input-${task.id}" placeholder="Add tag..."
+                                        onkeypress="if(event.key==='Enter'){event.preventDefault();addTag(${task.id})}">
+                                    <button class="btn-add-tag" onclick="addTag(${task.id})">Tag</button>
+                                </div>
+                            </div>
+                            ${task.tags && task.tags.length > 0 ? `
+                                <div class="task-tags">
+                                    ${task.tags.map(tag => `
+                                        <span class="tag">
+                                            ${escapeHtml(tag)}
+                                            <button class="tag-remove" onclick="removeTag(${task.id}, '${escapeHtml(tag)}')">
+                                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            ${task.subtasks.length > 0 || task.expanded ? `
+                                <div class="subtasks-section">
+                                    ${task.subtasks.length > 0 ? `<div class="subtasks-label">Subtasks</div>` : ''}
+                                    <div class="subtask-list">${subtasksHtml}</div>
+                                </div>
+                            ` : ''}
+                            <div class="add-subtask-group">
+                                <input type="text" class="subtask-input" id="subtask-input-${task.id}" placeholder="Add subtask..."
+                                    onkeypress="if(event.key==='Enter'){event.preventDefault();addSubtask(${task.id})}">
+                                <button class="btn-add-subtask" onclick="addSubtask(${task.id})">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function escapeHtml(text) {
+function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        initTheme();
+        async function initPinState() {
+            if (window.electronAPI) {
+                try {
+                    const pinned = await window.electronAPI.getPinState();
+                    updatePinUIFromState(pinned);
+                } catch (e) {
+                    updatePinUI();
+                }
+            } else {
+                updatePinUI();
+            }
+        }
+
+        document.getElementById('pinBtn').addEventListener('click', async () => {
+            if (window.electronAPI) {
+                try {
+                    const pinned = await window.electronAPI.togglePin();
+                    updatePinUIFromState(pinned);
+                } catch (e) {
+                    isPinned = !isPinned;
+                    updatePinUI();
+                }
+            }
+        });
+
+        document.getElementById('minimizeBtn').addEventListener('click', () => {
+            if (window.electronAPI) window.electronAPI.minimize();
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            if (window.electronAPI) window.electronAPI.close();
+        });
+
+        function updatePinUIFromState(pinned) {
+            const pinBtn = document.getElementById('pinBtn');
+            const pinIcon = document.getElementById('pinIcon');
+            if (pinned) {
+                pinBtn.classList.add('active');
+                pinBtn.title = 'Unpin window';
+                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+            } else {
+                pinBtn.classList.remove('active');
+                pinBtn.title = 'Pin window';
+                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+            }
+        }
+
+        initPinState();
         render();
     </script>
 </body>

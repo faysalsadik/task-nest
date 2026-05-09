@@ -1,0 +1,16 @@
+{
+  "name": "tasky",
+  "version": "1.0.0",
+  "description": "Minimal floating todo app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1"
+  }
+}
