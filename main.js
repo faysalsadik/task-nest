@@ -45,7 +45,7 @@ mainWindow = new BrowserWindow({
         transparent: false,
         alwaysOnTop: isPinned,
         resizable: true,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#000000',
         hasShadow: false,
         webPreferences: {
             nodeIntegration: false,
