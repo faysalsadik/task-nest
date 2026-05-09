@@ -47,6 +47,7 @@ mainWindow = new BrowserWindow({
         resizable: true,
         backgroundColor: '#000000',
         hasShadow: false,
+        thickFrame: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,

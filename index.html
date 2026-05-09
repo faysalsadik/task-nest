@@ -62,7 +62,6 @@
             padding: 0 8px;
             -webkit-app-region: drag;
             flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
         }
 
         .titlebar-left {
@@ -380,12 +379,13 @@
 
         .tag-input {
             width: 80px;
-            padding: 4px 6px;
+            padding: 6px 8px;
+            height: 30px;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 4px;
             color: var(--text);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-family: inherit;
             outline: none;
         }
@@ -541,6 +541,7 @@
 
         .deadline-input {
             padding: 6px 8px;
+            height: 30px;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 4px;
@@ -592,8 +593,8 @@
         }
 
         .subtask-item input:checked ~ .checkmark {
-            background: #666666;
-            border-color: #666666;
+            background: #333333;
+            border-color: #333333;
         }
 
         .subtask-item .checkmark::after {
