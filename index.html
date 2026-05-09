@@ -16,10 +16,10 @@
 
         :root {
             --bg: #0a0a0a;
-            --card: #1a1a1a;
-            --card-hover: #252525;
-            --border: #333333;
-            --text: #e8e8e8;
+            --card: #141414;
+            --card-hover: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #b0b0b0;
             --text-muted: #888888;
             --accent: #ffffff;
             --accent-hover: #e0e0e0;
@@ -27,17 +27,31 @@
             --warning: #bbbbbb;
             --danger: #ffffff;
             --pin-active: #ffffff;
-            --pin-inactive: #666666;
+            --pin-inactive: #555555;
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
-            min-height: 100vh;
+            height: 100vh;
             color: var(--text);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            border: none;
+            outline: none;
+            -webkit-app-region: no-drag;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background: var(--bg);
+            border: none;
+            outline: none;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
         }
 
         .titlebar {
@@ -98,6 +112,14 @@
             color: var(--pin-active);
         }
 
+        .titlebar-btn.auto-start.active {
+            color: var(--accent);
+        }
+
+        .titlebar-btn#autoStartBtn {
+            transition: all 0.2s;
+        }
+
         .titlebar-btn.close:hover {
             background: var(--danger);
             color: white;
@@ -107,15 +129,26 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
             padding: 12px;
             gap: 8px;
+            min-height: 0;
+            height: 100%;
+            box-sizing: border-box;
         }
 
         .input-area {
             display: flex;
             gap: 6px;
             flex-shrink: 0;
+        }
+
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 0;
         }
 
         .task-input {
@@ -139,16 +172,53 @@
             color: var(--text-muted);
         }
 
-        .btn-add {
+.btn-add {
             padding: 10px 14px;
-            background: #404040;
-            border: 1px solid #555555;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
             border-radius: 8px;
             color: #ffffff;
             font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.15s;
+        }
+
+        .btn-add:hover {
+            background: #333333;
+        }
+
+        .btn-add-subtask {
+            padding: 4px 6px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-add-subtask:hover {
+            background: #333333;
+        }
+
+        .btn-add-tag {
+            padding: 4px 10px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-add-tag:hover {
+            background: #333333;
         }
 
         .btn-add:hover {
@@ -161,6 +231,8 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+            min-height: 0;
+            height: 100%;
         }
 
         .task-list::-webkit-scrollbar {
@@ -222,9 +294,14 @@
             transition: all 0.15s;
         }
 
-        .checkbox input:checked ~ .checkmark {
-            background: #666666;
-            border-color: #666666;
+.checkbox input:checked ~ .checkmark {
+            background: #333333;
+            border-color: #333333;
+        }
+
+        .subtask-item input:checked ~ .checkmark {
+            background: #333333;
+            border-color: #333333;
         }
 
         .checkmark::after {
@@ -290,7 +367,7 @@
         }
 
         .tag-remove:hover {
-            background: #555555;
+            background: #333333;
             color: #ffffff;
         }
 
@@ -696,6 +773,11 @@
         <div class="titlebar-right">
             <button class="titlebar-btn pin" id="pinBtn" title="Toggle always on top">
                 <svg id="pinIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                </svg>
+            </button>
+            <button class="titlebar-btn" id="autoStartBtn" title="Toggle auto start">
+                <svg id="autoStartIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                 </svg>
             </button>
             <button class="titlebar-btn" id="minimizeBtn" title="Minimize">
@@ -1124,6 +1206,41 @@ function escapeHtml(text) {
             if (window.electronAPI) window.electronAPI.close();
         });
 
+        document.getElementById('autoStartBtn').addEventListener('click', async () => {
+            if (window.electronAPI) {
+                const enabled = await window.electronAPI.getAutoStart();
+                await window.electronAPI.setAutoStart(!enabled);
+                updateAutoStartUI(!enabled);
+            }
+        });
+
+        function updateAutoStartUI(enabled) {
+            const btn = document.getElementById('autoStartBtn');
+            const icon = document.getElementById('autoStartIcon');
+            if (enabled) {
+                btn.classList.add('active');
+                btn.title = 'Disable auto start';
+                btn.style.color = '#ffffff';
+                btn.style.background = '#333333';
+                btn.style.borderRadius = '6px';
+                if (icon) icon.innerHTML = '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
+            } else {
+                btn.classList.remove('active');
+                btn.title = 'Enable auto start';
+                btn.style.color = '#666666';
+                btn.style.background = 'transparent';
+                btn.style.borderRadius = '6px';
+                if (icon) icon.innerHTML = '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
+            }
+        }
+
+        async function initAutoStart() {
+            if (window.electronAPI) {
+                const enabled = await window.electronAPI.getAutoStart();
+                updateAutoStartUI(enabled);
+            }
+        }
+
         function updatePinUIFromState(pinned) {
             const pinBtn = document.getElementById('pinBtn');
             const pinIcon = document.getElementById('pinIcon');
@@ -1139,6 +1256,7 @@ function escapeHtml(text) {
         }
 
         initPinState();
+        initAutoStart();
         render();
     </script>
 </body>

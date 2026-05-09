@@ -34,7 +34,7 @@ function createWindow() {
 
     const bounds = savedBounds || { width: 350, height: 500 };
 
-    mainWindow = new BrowserWindow({
+mainWindow = new BrowserWindow({
         width: bounds.width,
         height: bounds.height,
         x: bounds.x,
@@ -45,6 +45,8 @@ function createWindow() {
         transparent: false,
         alwaysOnTop: isPinned,
         resizable: true,
+        backgroundColor: '#0a0a0a',
+        hasShadow: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -114,6 +116,19 @@ ipcMain.handle('close-window', () => {
 
 ipcMain.handle('get-pin-state', () => {
     return isPinned;
+});
+
+ipcMain.handle('get-auto-start', () => {
+    const loginItemSettings = app.getLoginItemSettings();
+    return loginItemSettings.openAtLogin;
+});
+
+ipcMain.handle('set-auto-start', (event, enable) => {
+    app.setLoginItemSettings({
+        openAtLogin: enable,
+        path: process.execPath
+    });
+    return enable;
 });
 
 app.whenReady().then(() => {
