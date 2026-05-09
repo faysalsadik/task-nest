@@ -2,7 +2,7 @@ const CACHE_NAME = 'tasknest-v3';
 const urlsToCache = [
     './',
     './index.html',
-    './icon.svg',
+    './icon.png',
     './manifest.json'
 ];
 
