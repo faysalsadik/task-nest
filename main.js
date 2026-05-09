@@ -52,7 +52,7 @@ mainWindow = new BrowserWindow({
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js')
         },
-        icon: 'icon.svg',
+        icon: 'icon_256.png',
         title: 'Tasky',
         show: false
     });

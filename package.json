@@ -7,6 +7,23 @@
     "start": "electron .",
     "build": "electron-builder --win --x64"
   },
+  "build": {
+    "appId": "com.tasky.app",
+    "productName": "Tasky",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "icon.ico"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "icon.svg",
+      "icon.png"
+    ]
+  },
   "author": "",
   "license": "MIT",
   "devDependencies": {
