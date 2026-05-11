@@ -9,5 +9,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setAutoStart: (enable) => ipcRenderer.invoke('set-auto-start', enable),
     onPinChanged: (callback) => {
         ipcRenderer.on('pin-changed', (_, isPinned) => callback(isPinned));
-    }
+    },
+
+    getAllTasks: () => ipcRenderer.invoke('db:get-all-tasks'),
+    createTask: (data) => ipcRenderer.invoke('db:create-task', data),
+    updateTask: (data) => ipcRenderer.invoke('db:update-task', data),
+    deleteTask: (id) => ipcRenderer.invoke('db:delete-task', id),
+    createSubtask: (data) => ipcRenderer.invoke('db:create-subtask', data),
+    updateSubtask: (data) => ipcRenderer.invoke('db:update-subtask', data),
+    deleteSubtask: (id) => ipcRenderer.invoke('db:delete-subtask', id),
+    addTag: (data) => ipcRenderer.invoke('db:add-tag', data),
+    removeTag: (data) => ipcRenderer.invoke('db:remove-tag', data),
+
+    getAllProjects: () => ipcRenderer.invoke('db:get-all-projects'),
+    createProject: (data) => ipcRenderer.invoke('db:create-project', data),
+    updateProject: (data) => ipcRenderer.invoke('db:update-project', data),
+    deleteProject: (id) => ipcRenderer.invoke('db:delete-project', id),
 });

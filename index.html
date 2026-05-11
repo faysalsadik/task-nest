@@ -42,6 +42,7 @@
             -webkit-app-region: no-drag;
             margin: 0;
             padding: 0;
+            position: relative;
         }
 
         html, body {
@@ -117,6 +118,11 @@
 
         .titlebar-btn#autoStartBtn {
             transition: all 0.2s;
+        }
+
+        .titlebar-btn.hamburger.active {
+            background: var(--card);
+            color: var(--accent);
         }
 
         .titlebar-btn.close:hover {
@@ -764,6 +770,481 @@
         .empty-state p {
             font-size: 0.8rem;
         }
+
+        /* ── Projects Panel ── */
+        .projects-panel {
+            position: absolute;
+            top: 36px;
+            left: -100%;
+            width: 100%;
+            height: calc(100% - 36px);
+            background: var(--bg);
+            transition: left 0.25s ease;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .projects-panel.open {
+            left: 0;
+        }
+
+        .projects-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .back-btn:hover {
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .projects-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .btn-header-project {
+            padding: 5px 10px;
+            background: transparent;
+            border: 1px dashed var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-header-project:hover {
+            border-color: var(--text-muted);
+            color: var(--text);
+            background: var(--card);
+        }
+
+        .btn-header-project svg {
+            transition: transform 0.2s;
+        }
+
+        .btn-header-project.active svg {
+            transform: rotate(45deg);
+        }
+
+        .projects-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .project-form-wrap {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .project-form-wrap.open {
+            max-height: 500px;
+        }
+
+        .project-form {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .project-form input,
+        .project-form textarea {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 0.8rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .project-form input:focus,
+        .project-form textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .project-form textarea {
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .project-form .form-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .project-form .form-row label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        .project-form .form-row input {
+            flex: 1;
+        }
+
+        .btn-add-project {
+            padding: 8px 14px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.8rem;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+
+        .btn-add-project:hover {
+            background: #333333;
+        }
+
+        .project-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            border-color: #3a3a3a;
+        }
+
+        .project-main {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .project-main:hover {
+            background: var(--card-hover);
+        }
+
+        .project-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .project-timeframe {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--border);
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .project-expand {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .project-expand:hover {
+            background: var(--border);
+        }
+
+        .project-expand svg {
+            transition: transform 0.2s;
+        }
+
+        .project-expand.expanded svg {
+            transform: rotate(180deg);
+        }
+
+        .project-delete-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            opacity: 0;
+        }
+
+        .project-card:hover .project-delete-btn {
+            opacity: 1;
+        }
+
+        .project-delete-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .project-details {
+            display: none;
+            padding: 0 12px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .project-details.visible {
+            display: block;
+        }
+
+        .project-detail-section {
+            margin-top: 10px;
+        }
+
+        .project-detail-section:first-child {
+            margin-top: 12px;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 0.8rem;
+            color: var(--text);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .detail-value.empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-edit-project {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-edit-project:hover {
+            background: var(--card-hover);
+            border-color: var(--text-muted);
+        }
+
+        .empty-projects {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: 8px;
+            padding: 40px 0;
+        }
+
+        .empty-projects svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.4;
+        }
+
+        .empty-projects p {
+            font-size: 0.8rem;
+        }
+
+        /* ── Tag Autocomplete ── */
+        .tag-wrapper {
+            position: relative;
+        }
+
+        .tag-autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            max-height: 120px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .tag-autocomplete.show {
+            display: block;
+        }
+
+        .tag-autocomplete-item {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .tag-autocomplete-item:hover {
+            background: var(--card-hover);
+        }
+
+        .tag-autocomplete-item .hint {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            margin-left: 6px;
+        }
+
+        .task-tag.is-project {
+            background: #1a3a2a;
+            border-color: #2a5a3a;
+        }
+
+        /* ── Edit Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 20;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            width: 90%;
+            max-width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .modal input,
+        .modal textarea {
+            width: 100%;
+            padding: 8px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 0.8rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .modal input:focus,
+        .modal textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .modal textarea {
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+
+        .modal-actions button {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancel {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-modal-cancel:hover {
+            background: var(--card-hover);
+        }
+
+        .btn-modal-save {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            color: #ffffff;
+        }
+
+        .btn-modal-save:hover {
+            background: #333333;
+        }
     </style>
 </head>
 <body>
@@ -778,7 +1259,14 @@
             </button>
             <button class="titlebar-btn" id="autoStartBtn" title="Toggle auto start">
                 <svg id="autoStartIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    <path d="M12 2v10M18.36 6.64a9 9 0 1 1-12.73 0"/>
+                </svg>
+            </button>
+            <button class="titlebar-btn hamburger" id="hamburgerBtn" title="Projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
             <button class="titlebar-btn" id="minimizeBtn" title="Minimize">
@@ -802,31 +1290,64 @@
         <div class="task-list" id="taskList"></div>
     </div>
 
+    <!-- Projects Panel -->
+    <div class="projects-panel" id="projectsPanel">
+        <div class="projects-header">
+            <button class="back-btn" id="backBtn" title="Back to tasks">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <span class="projects-title">Projects</span>
+            <button class="btn-header-project" id="newProjectBtn">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New
+            </button>
+        </div>
+        <div class="projects-body" id="projectsBody">
+            <div class="project-form-wrap" id="projectFormWrap">
+                <div class="project-form">
+                    <input type="text" id="projectNameInput" placeholder="Project name..." maxlength="100">
+                    <textarea id="projectDetailsInput" placeholder="Project details..."></textarea>
+                    <textarea id="projectGoalsInput" placeholder="Goals..." rows="2"></textarea>
+                    <div class="form-row">
+                        <label>Time frame</label>
+                        <input type="text" id="projectTimeframeInput" placeholder="e.g. Q1 2026, Jan-Mar">
+                    </div>
+                    <textarea id="projectRoadmapInput" placeholder="Road map (with time milestones)..." rows="3"></textarea>
+                    <button class="btn-add-project" id="addProjectBtn">Add Project</button>
+                </div>
+            </div>
+            <div id="projectsList"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-title">Edit Project</div>
+            <input type="text" id="editName" placeholder="Project name...">
+            <textarea id="editDetails" placeholder="Project details..."></textarea>
+            <textarea id="editGoals" placeholder="Goals..." rows="2"></textarea>
+            <div class="form-row" style="display:flex;gap:8px;align-items:center;">
+                <label style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;min-width:70px;">Time frame</label>
+                <input type="text" id="editTimeframe" placeholder="e.g. Q1 2026, Jan-Mar" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.8rem;font-family:inherit;outline:none;padding:8px 10px;">
+            </div>
+            <textarea id="editRoadmap" placeholder="Road map (with time milestones)..." rows="3"></textarea>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="cancelEditBtn">Cancel</button>
+                <button class="btn-modal-save" id="saveEditBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let data = JSON.parse(localStorage.getItem('taskyData')) || { tasks: [] };
-        let isPinned = localStorage.getItem('taskyPinned') !== 'false';
-
-        function saveData() {
-            localStorage.setItem('taskyData', JSON.stringify(data));
-        }
-
-        function updatePinUI() {
-            const pinBtn = document.getElementById('pinBtn');
-            const pinIcon = document.getElementById('pinIcon');
-            if (isPinned) {
-                pinBtn.classList.add('active');
-                pinBtn.title = 'Unpin window';
-                if (pinIcon) {
-                    pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
-                }
-            } else {
-                pinBtn.classList.remove('active');
-                pinBtn.title = 'Pin window';
-                if (pinIcon) {
-                    pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
-                }
-            }
-        }
+        let data = { tasks: [] };
+        let projects = [];
+        let editingProjectId = null;
 
         function formatDeadline(dateStr) {
             if (!dateStr) return null;
@@ -844,99 +1365,97 @@
             return { text: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), class: '' };
         }
 
-        function addTask() {
+        async function loadData() {
+            if (window.electronAPI) {
+                const expandedTasks = new Set();
+                const expandedSubtasks = new Set();
+                for (const t of data.tasks) {
+                    if (t.expanded) expandedTasks.add(t.id);
+                    for (const st of t.subtasks) {
+                        if (st.expanded) expandedSubtasks.add(st.id);
+                    }
+                }
+
+                data = await window.electronAPI.getAllTasks();
+
+                for (const t of data.tasks) {
+                    if (expandedTasks.has(t.id)) t.expanded = true;
+                    for (const st of t.subtasks) {
+                        if (expandedSubtasks.has(st.id)) st.expanded = true;
+                    }
+                }
+            }
+            render();
+        }
+
+        async function addTask() {
             const input = document.getElementById('taskInput');
             const title = input.value.trim();
             if (!title) return;
 
-            data.tasks.unshift({
-                id: Date.now(),
-                title,
-                details: '',
-                deadline: '',
-                tags: [],
-                completed: false,
-                expanded: false,
-                subtasks: []
-            });
+            if (window.electronAPI) {
+                await window.electronAPI.createTask({ title });
+                await loadData();
+            }
             input.value = '';
-            saveData();
-            render();
         }
 
-        function toggleTask(id) {
+        async function toggleTask(id) {
             const task = data.tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveData();
-                render();
+            if (task && window.electronAPI) {
+                await window.electronAPI.updateTask({ id, completed: !task.completed });
+                await loadData();
             }
         }
 
-        function deleteTask(id) {
-            data.tasks = data.tasks.filter(t => t.id !== id);
-            saveData();
-            render();
+        async function deleteTask(id) {
+            if (window.electronAPI) {
+                await window.electronAPI.deleteTask(id);
+                await loadData();
+            }
         }
 
-        function toggleExpand(id) {
+        async function toggleExpand(id) {
             const task = data.tasks.find(t => t.id === id);
             if (task) {
                 task.expanded = !task.expanded;
-                saveData();
                 render();
             }
         }
 
-        function updateTaskDetails(id, field, value) {
-            const task = data.tasks.find(t => t.id === id);
-            if (task) {
-                task[field] = value;
-                saveData();
+        async function updateTaskDetails(id, field, value) {
+            if (window.electronAPI) {
+                await window.electronAPI.updateTask({ id, [field]: value });
             }
         }
 
-        function addSubtask(taskId) {
+        async function addSubtask(taskId) {
             const input = document.getElementById(`subtask-input-${taskId}`);
             if (!input) return;
             const title = input.value.trim();
             if (!title) return;
 
+            if (window.electronAPI) {
+                await window.electronAPI.createSubtask({ taskId, title });
+                await loadData();
+            }
+            input.value = '';
+        }
+
+        async function toggleSubtask(taskId, subtaskId) {
             const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
-                task.subtasks.push({
-                    id: Date.now(),
-                    title,
-                    details: '',
-                    deadline: '',
-                    tags: [],
-                    completed: false,
-                    expanded: false
-                });
-                input.value = '';
-                saveData();
-                render();
+            if (!task) return;
+            const subtask = task.subtasks.find(s => s.id === subtaskId);
+            if (subtask && window.electronAPI) {
+                await window.electronAPI.updateSubtask({ id: subtaskId, completed: !subtask.completed });
+                await loadData();
             }
         }
 
-        function toggleSubtask(taskId, subtaskId) {
-            const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
-                const subtask = task.subtasks.find(s => s.id === subtaskId);
-                if (subtask) {
-                    subtask.completed = !subtask.completed;
-                    saveData();
-                    render();
-                }
-            }
-        }
-
-        function deleteSubtask(taskId, subtaskId) {
-            const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
-                task.subtasks = task.subtasks.filter(s => s.id !== subtaskId);
-                saveData();
-                render();
+        async function deleteSubtask(taskId, subtaskId) {
+            if (window.electronAPI) {
+                await window.electronAPI.deleteSubtask(subtaskId);
+                await loadData();
             }
         }
 
@@ -946,72 +1465,241 @@
                 const subtask = task.subtasks.find(s => s.id === subtaskId);
                 if (subtask) {
                     subtask.expanded = !subtask.expanded;
-                    saveData();
                     render();
                 }
             }
         }
 
-        function updateSubtaskDetails(taskId, subtaskId, field, value) {
-            const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
-                const subtask = task.subtasks.find(s => s.id === subtaskId);
-                if (subtask) {
-                    subtask[field] = value;
-                    saveData();
-                }
+        async function updateSubtaskDetails(taskId, subtaskId, field, value) {
+            if (window.electronAPI) {
+                await window.electronAPI.updateSubtask({ id: subtaskId, [field]: value });
             }
         }
 
-        function addTag(taskId, isSubtask = false, subtaskId = null) {
+        async function addTag(taskId, isSubtask = false, subtaskId = null, directName) {
             const input = document.getElementById(`tag-input-${taskId}${isSubtask ? '-' + subtaskId : ''}`);
-            if (!input) return;
-            const tag = input.value.trim();
-            if (!tag) return;
+            if (!input && !directName) return;
+            const name = directName || input.value.trim();
+            if (!name) return;
 
-            const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
+            if (window.electronAPI) {
+                const params = { name };
                 if (isSubtask && subtaskId !== null) {
-                    const subtask = task.subtasks.find(s => s.id === subtaskId);
-                    if (subtask) {
-                        if (!subtask.tags) subtask.tags = [];
-                        if (!subtask.tags.includes(tag)) {
-                            subtask.tags.push(tag);
-                            input.value = '';
-                            saveData();
-                            render();
-                        }
-                    }
+                    params.subtaskId = subtaskId;
                 } else {
-                    if (!task.tags) task.tags = [];
-                    if (!task.tags.includes(tag)) {
-                        task.tags.push(tag);
-                        input.value = '';
-                        saveData();
-                        render();
-                    }
+                    params.taskId = taskId;
                 }
+                const task = data.tasks.find(t => t.id === taskId);
+                const target = isSubtask ? task?.subtasks.find(s => s.id === subtaskId) : task;
+                if (target?.tags?.includes(name)) return;
+                await window.electronAPI.addTag(params);
+                await loadData();
+            }
+            if (input && !directName) input.value = '';
+        }
+
+        async function removeTag(taskId, tag, isSubtask = false, subtaskId = null) {
+            if (window.electronAPI) {
+                const params = { name: tag };
+                if (isSubtask && subtaskId !== null) {
+                    params.subtaskId = subtaskId;
+                } else {
+                    params.taskId = taskId;
+                }
+                await window.electronAPI.removeTag(params);
+                await loadData();
             }
         }
 
-        function removeTag(taskId, tag, isSubtask = false, subtaskId = null) {
-            const task = data.tasks.find(t => t.id === taskId);
-            if (task) {
-                if (isSubtask && subtaskId !== null) {
-                    const subtask = task.subtasks.find(s => s.id === subtaskId);
-                    if (subtask && subtask.tags) {
-                        subtask.tags = subtask.tags.filter(t => t !== tag);
-                        saveData();
-                        render();
-                    }
-                } else {
-                    if (task.tags) {
-                        task.tags = task.tags.filter(t => t !== tag);
-                        saveData();
-                        render();
-                    }
-                }
+        // ── Projects ──
+        let projectFormOpen = false;
+
+        async function loadProjects() {
+            if (window.electronAPI) {
+                projects = await window.electronAPI.getAllProjects();
             }
+            renderProjects();
+        }
+
+        function toggleProjects() {
+            const panel = document.getElementById('projectsPanel');
+            const hamburger = document.getElementById('hamburgerBtn');
+            const isOpen = panel.classList.contains('open');
+            if (isOpen) {
+                panel.classList.remove('open');
+                hamburger.classList.remove('active');
+            } else {
+                panel.classList.add('open');
+                hamburger.classList.add('active');
+                loadProjects();
+            }
+        }
+
+        function toggleNewProjectForm() {
+            projectFormOpen = !projectFormOpen;
+            const wrap = document.getElementById('projectFormWrap');
+            const btn = document.getElementById('newProjectBtn');
+            wrap.classList.toggle('open', projectFormOpen);
+            btn.classList.toggle('active', projectFormOpen);
+            if (projectFormOpen) {
+                document.getElementById('projectNameInput').focus();
+            }
+        }
+
+        async function addProject() {
+            const name = document.getElementById('projectNameInput').value.trim();
+            if (!name) return;
+
+            if (window.electronAPI) {
+                await window.electronAPI.createProject({
+                    name,
+                    details: document.getElementById('projectDetailsInput').value.trim(),
+                    goals: document.getElementById('projectGoalsInput').value.trim(),
+                    time_frame: document.getElementById('projectTimeframeInput').value.trim(),
+                    road_map: document.getElementById('projectRoadmapInput').value.trim()
+                });
+
+                document.getElementById('projectNameInput').value = '';
+                document.getElementById('projectDetailsInput').value = '';
+                document.getElementById('projectGoalsInput').value = '';
+                document.getElementById('projectTimeframeInput').value = '';
+                document.getElementById('projectRoadmapInput').value = '';
+
+                await loadProjects();
+                toggleNewProjectForm();
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Delete this project?')) return;
+            if (window.electronAPI) {
+                await window.electronAPI.deleteProject(id);
+                await loadProjects();
+            }
+        }
+
+        function openEditModal(id) {
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+            editingProjectId = id;
+            document.getElementById('editName').value = project.name || '';
+            document.getElementById('editDetails').value = project.details || '';
+            document.getElementById('editGoals').value = project.goals || '';
+            document.getElementById('editTimeframe').value = project.time_frame || '';
+            document.getElementById('editRoadmap').value = project.road_map || '';
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            editingProjectId = null;
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        async function saveEdit() {
+            if (!editingProjectId) return;
+            const project = projects.find(p => p.id === editingProjectId);
+            if (!project) return;
+            if (window.electronAPI) {
+                await window.electronAPI.updateProject({
+                    id: editingProjectId,
+                    name: document.getElementById('editName').value.trim() || project.name,
+                    details: document.getElementById('editDetails').value.trim(),
+                    goals: document.getElementById('editGoals').value.trim(),
+                    time_frame: document.getElementById('editTimeframe').value.trim(),
+                    road_map: document.getElementById('editRoadmap').value.trim()
+                });
+                closeEditModal();
+                await loadProjects();
+            }
+        }
+
+        function toggleProjectExpand(id) {
+            const project = projects.find(p => p.id === id);
+            if (project) {
+                project.expanded = !project.expanded;
+                renderProjects();
+            }
+        }
+
+        function getProjectNames() {
+            return [...new Set(projects.map(p => p.name))];
+        }
+
+        function showTagSuggestions(input, taskId, subtaskId) {
+            const suffix = subtaskId ? '-' + subtaskId : '';
+            const list = document.getElementById('tag-suggest-' + taskId + suffix);
+            if (!list) return;
+            const val = input.value.trim().toLowerCase();
+            if (!val) { list.classList.remove('show'); return; }
+            const names = getProjectNames();
+            const matches = names.filter(n => n.toLowerCase().includes(val));
+            if (matches.length === 0) { list.classList.remove('show'); return; }
+            const subtaskAttr = subtaskId ? 'true' : 'false';
+            const subIdAttr = subtaskId || '';
+            list.innerHTML = matches.map(n =>
+                '<div class="tag-autocomplete-item" data-task="' + taskId + '" data-subtask="' + subtaskAttr + '" data-subtaskid="' + subIdAttr + '" data-name="' + n.replace(/"/g, '&quot;') + '">' + escapeHtml(n) + ' <span class="hint">project</span></div>'
+            ).join('');
+            list.classList.add('show');
+        }
+
+        function selectTagSuggestion(taskId, subtaskId) {
+            const suffix = subtaskId ? '-' + subtaskId : '';
+            const list = document.getElementById('tag-suggest-' + taskId + suffix);
+            if (!list) return;
+            const selected = list.querySelector('.tag-autocomplete-item');
+            if (selected) {
+                const name = selected.dataset.name;
+                const isSub = selected.dataset.subtask === 'true';
+                const subId = parseInt(selected.dataset.subtaskid) || null;
+                addTag(parseInt(selected.dataset.task), isSub, subId, name);
+            }
+            list.classList.remove('show');
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projectsList');
+            if (!container) return;
+
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="empty-projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"></path><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"></path></svg><p>No projects yet</p></div>';
+                return;
+            }
+
+            container.innerHTML = projects.map(function(p) {
+                const linkedTasks = data.tasks.filter(function(t) { return t.tags && t.tags.indexOf(p.name) !== -1; });
+                var linkedHtml = '';
+                if (linkedTasks.length > 0) {
+                    linkedHtml = '<div class="project-detail-section"><div class="detail-label">Linked Tasks (' + linkedTasks.length + ')</div>';
+                    for (var i = 0; i < linkedTasks.length; i++) {
+                        linkedHtml += '<div class="detail-value" style="font-size:0.75rem;padding:2px 0;">\u2022 ' + escapeHtml(linkedTasks[i].title) + '</div>';
+                    }
+                    linkedHtml += '</div>';
+                }
+
+                var detailsHtml = '';
+                if (p.details) { detailsHtml += '<div class="project-detail-section"><div class="detail-label">Details</div><div class="detail-value">' + escapeHtml(p.details) + '</div></div>'; }
+                if (p.goals) { detailsHtml += '<div class="project-detail-section"><div class="detail-label">Goals</div><div class="detail-value">' + escapeHtml(p.goals) + '</div></div>'; }
+                if (p.road_map) { detailsHtml += '<div class="project-detail-section"><div class="detail-label">Road Map</div><div class="detail-value">' + escapeHtml(p.road_map) + '</div></div>'; }
+                if (!p.details && !p.goals && !p.road_map) { detailsHtml += '<div class="project-detail-section"><div class="detail-value empty">No details added yet</div></div>'; }
+
+                return '<div class="project-card">'
+                    + '<div class="project-main" onclick="toggleProjectExpand(' + p.id + ')">'
+                    + '<span class="project-name">' + escapeHtml(p.name) + '</span>'
+                    + (p.time_frame ? '<span class="project-timeframe">' + escapeHtml(p.time_frame) + '</span>' : '')
+                    + '<button class="project-expand' + (p.expanded ? ' expanded' : '') + '" onclick="event.stopPropagation();toggleProjectExpand(' + p.id + ')">'
+                    + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>'
+                    + '</button>'
+                    + '<button class="project-delete-btn" onclick="event.stopPropagation();deleteProject(' + p.id + ')">'
+                    + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                    + '</button>'
+                    + '</div>'
+                    + '<div class="project-details' + (p.expanded ? ' visible' : '') + '">'
+                    + detailsHtml
+                    + linkedHtml
+                    + '<div class="project-actions"><button class="btn-edit-project" onclick="openEditModal(' + p.id + ')">Edit</button></div>'
+                    + '</div>'
+                    + '</div>';
+            }).join('');
         }
 
         function render() {
@@ -1064,23 +1752,26 @@
                                         onchange="updateSubtaskDetails(${task.id}, ${st.id}, 'deadline', this.value)">
                                 </div>
                                 <div class="add-tag-group">
-                                    <input type="text" class="tag-input" id="tag-input-${task.id}-${st.id}" placeholder="Add tag..."
-                                        onkeypress="if(event.key==='Enter'){event.preventDefault();addTag(${task.id}, true, ${st.id})}">
+                                    <div class="tag-wrapper" style="flex:1;">
+                                        <input type="text" class="tag-input" id="tag-input-${task.id}-${st.id}" placeholder="Tag with project name..."
+                                            oninput="showTagSuggestions(this, ${task.id}, ${st.id})"
+                                            onkeypress="if(event.key==='Enter'){event.preventDefault();selectTagSuggestion(${task.id}, ${st.id});if(!document.getElementById('tag-suggest-${task.id}-${st.id}')?.classList.contains('show'))addTag(${task.id}, true, ${st.id})}"
+                                            onblur="setTimeout(()=>{var el=document.getElementById('tag-suggest-${task.id}-${st.id}');if(el)el.classList.remove('show')},200)">
+                                        <div class="tag-autocomplete" id="tag-suggest-${task.id}-${st.id}"></div>
+                                    </div>
                                 </div>
                             </div>
                             ${st.tags && st.tags.length > 0 ? `
                                 <div class="task-tags" style="margin-top:6px;">
-                                    ${st.tags.map(tag => `
-                                        <span class="tag">
-                                            ${escapeHtml(tag)}
-                                            <button class="tag-remove" onclick="removeTag(${task.id}, '${escapeHtml(tag)}', true, ${st.id})">
-                                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    `).join('')}
+                                    ${st.tags.map(function(tag) {
+                                        var isP = projects.some(function(p) { return p.name === tag; });
+                                        return '<span class="tag' + (isP ? ' is-project' : '') + '">'
+                                            + escapeHtml(tag)
+                                            + '<button class="tag-remove" onclick="removeTag(' + task.id + ', \'' + escapeHtml(tag) + '\', true, ' + st.id + ')">'
+                                            + '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                                            + '</button>'
+                                            + '</span>';
+                                    }).join('')}
                                 </div>
                             ` : ''}
                             </div>
@@ -1119,23 +1810,26 @@
                                         onchange="updateTaskDetails(${task.id}, 'deadline', this.value)">
                                 </div>
                                 <div class="add-tag-group">
-                                    <input type="text" class="tag-input" id="tag-input-${task.id}" placeholder="Add tag..."
-                                        onkeypress="if(event.key==='Enter'){event.preventDefault();addTag(${task.id})}">
+                                    <div class="tag-wrapper" style="flex:1;">
+                                        <input type="text" class="tag-input" id="tag-input-${task.id}" placeholder="Tag with project name..."
+                                            oninput="showTagSuggestions(this, ${task.id})"
+                                            onkeypress="if(event.key==='Enter'){event.preventDefault();selectTagSuggestion(${task.id});if(!document.getElementById('tag-suggest-${task.id}')?.classList.contains('show'))addTag(${task.id})}"
+                                            onblur="setTimeout(()=>{var el=document.getElementById('tag-suggest-${task.id}');if(el)el.classList.remove('show')},200)">
+                                        <div class="tag-autocomplete" id="tag-suggest-${task.id}"></div>
+                                    </div>
                                 </div>
                             </div>
                             ${task.tags && task.tags.length > 0 ? `
                                 <div class="task-tags">
-                                    ${task.tags.map(tag => `
-                                        <span class="tag">
-                                            ${escapeHtml(tag)}
-                                            <button class="tag-remove" onclick="removeTag(${task.id}, '${escapeHtml(tag)}')">
-                                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    `).join('')}
+                                    ${task.tags.map(function(tag) {
+                                        var isP = projects.some(function(p) { return p.name === tag; });
+                                        return '<span class="tag' + (isP ? ' is-project' : '') + '">'
+                                            + escapeHtml(tag)
+                                            + '<button class="tag-remove" onclick="removeTag(' + task.id + ', \'' + escapeHtml(tag) + '\')">'
+                                            + '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+                                            + '</button>'
+                                            + '</span>';
+                                    }).join('')}
                                 </div>
                             ` : ''}
                             ${task.subtasks.length > 0 || task.expanded ? `
@@ -1160,16 +1854,30 @@ function escapeHtml(text) {
             return div.innerHTML;
         }
 
+        function updatePinUIFromState(pinned) {
+            const pinBtn = document.getElementById('pinBtn');
+            const pinIcon = document.getElementById('pinIcon');
+            if (pinned) {
+                pinBtn.classList.add('active');
+                pinBtn.title = 'Unpin window';
+                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+            } else {
+                pinBtn.classList.remove('active');
+                pinBtn.title = 'Pin window';
+                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
+            }
+        }
+
         async function initPinState() {
             if (window.electronAPI) {
                 try {
                     const pinned = await window.electronAPI.getPinState();
                     updatePinUIFromState(pinned);
                 } catch (e) {
-                    updatePinUI();
+                    updatePinUIFromState(true);
                 }
             } else {
-                updatePinUI();
+                updatePinUIFromState(true);
             }
         }
 
@@ -1179,8 +1887,7 @@ function escapeHtml(text) {
                     const pinned = await window.electronAPI.togglePin();
                     updatePinUIFromState(pinned);
                 } catch (e) {
-                    isPinned = !isPinned;
-                    updatePinUI();
+                    updatePinUIFromState(true);
                 }
             }
         });
@@ -1210,14 +1917,14 @@ function escapeHtml(text) {
                 btn.style.color = '#ffffff';
                 btn.style.background = '#333333';
                 btn.style.borderRadius = '6px';
-                if (icon) icon.innerHTML = '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
+                if (icon) icon.innerHTML = '<path d="M12 2v10M18.36 6.64a9 9 0 1 1-12.73 0"/>';
             } else {
                 btn.classList.remove('active');
                 btn.title = 'Enable auto start';
                 btn.style.color = '#666666';
                 btn.style.background = 'transparent';
                 btn.style.borderRadius = '6px';
-                if (icon) icon.innerHTML = '<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>';
+                if (icon) icon.innerHTML = '<path d="M12 2v10M18.36 6.64a9 9 0 1 1-12.73 0"/>';
             }
         }
 
@@ -1228,23 +1935,43 @@ function escapeHtml(text) {
             }
         }
 
-        function updatePinUIFromState(pinned) {
-            const pinBtn = document.getElementById('pinBtn');
-            const pinIcon = document.getElementById('pinIcon');
-            if (pinned) {
-                pinBtn.classList.add('active');
-                pinBtn.title = 'Unpin window';
-                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
-            } else {
-                pinBtn.classList.remove('active');
-                pinBtn.title = 'Pin window';
-                if (pinIcon) pinIcon.innerHTML = '<path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>';
-            }
-        }
+        // ── Project Event Listeners ──
+        document.getElementById('hamburgerBtn').addEventListener('click', toggleProjects);
+        document.getElementById('backBtn').addEventListener('click', toggleProjects);
+        document.getElementById('newProjectBtn').addEventListener('click', toggleNewProjectForm);
+        document.getElementById('addProjectBtn').addEventListener('click', addProject);
+        document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+        document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
 
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === document.getElementById('editModal')) closeEditModal();
+        });
+
+        document.getElementById('projectNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addProject();
+        });
+
+        // Autocomplete item selection (mousedown to fire before blur)
+        document.addEventListener('mousedown', function(e) {
+            var item = e.target.closest('.tag-autocomplete-item');
+            if (item) {
+                e.preventDefault();
+                var list = item.closest('.tag-autocomplete');
+                var idStr = list.id.replace('tag-suggest-', '');
+                var parts = idStr.split('-');
+                var taskId = parseInt(parts[0]);
+                var subtaskId = parts.length > 1 ? parseInt(parts[1]) : null;
+                var name = item.dataset.name;
+                var isSub = item.dataset.subtask === 'true';
+                addTag(taskId, isSub, subtaskId, name);
+                list.classList.remove('show');
+            }
+        });
+
+        loadData();
+        loadProjects();
         initPinState();
         initAutoStart();
-        render();
     </script>
 </body>
 </html>
