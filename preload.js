@@ -25,4 +25,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createProject: (data) => ipcRenderer.invoke('db:create-project', data),
     updateProject: (data) => ipcRenderer.invoke('db:update-project', data),
     deleteProject: (id) => ipcRenderer.invoke('db:delete-project', id),
+
+    getAllNotes: () => ipcRenderer.invoke('db:get-all-notes'),
+    createNote: (data) => ipcRenderer.invoke('db:create-note', data),
+    updateNote: (data) => ipcRenderer.invoke('db:update-note', data),
+    deleteNote: (id) => ipcRenderer.invoke('db:delete-note', id),
+
+    reorderTasks: (ids) => ipcRenderer.invoke('db:reorder-tasks', ids),
+    reorderProjects: (ids) => ipcRenderer.invoke('db:reorder-projects', ids),
+    reorderNotes: (ids) => ipcRenderer.invoke('db:reorder-notes', ids),
 });

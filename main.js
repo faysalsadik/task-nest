@@ -57,8 +57,28 @@ async function initDatabase() {
         goals TEXT DEFAULT '',
         time_frame TEXT DEFAULT '',
         road_map TEXT DEFAULT '',
+        position INTEGER DEFAULT 0,
         created_at TEXT DEFAULT (datetime('now'))
     )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS notes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT DEFAULT '',
+        position INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now'))
+    )`);
+
+    function ensureColumn(table, column, def) {
+        try {
+            db.exec(`SELECT ${column} FROM ${table} LIMIT 1`);
+        } catch (e) {
+            db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`);
+        }
+    }
+
+    ensureColumn('projects', 'position', 'INTEGER DEFAULT 0');
+    ensureColumn('notes', 'position', 'INTEGER DEFAULT 0');
 
     saveDatabase();
 }
@@ -340,12 +360,14 @@ ipcMain.handle('db:remove-tag', (event, { taskId, subtaskId, name }) => {
 });
 
 ipcMain.handle('db:get-all-projects', () => {
-    return dbAll('SELECT * FROM projects ORDER BY id DESC');
+    return dbAll('SELECT * FROM projects ORDER BY position, id DESC');
 });
 
 ipcMain.handle('db:create-project', (event, { name, details, goals, time_frame, road_map }) => {
-    dbRun('INSERT INTO projects (name, details, goals, time_frame, road_map) VALUES (?, ?, ?, ?, ?)',
-        [name, details || '', goals || '', time_frame || '', road_map || '']);
+    const maxPos = dbGet('SELECT COALESCE(MAX(position), -1) as m FROM projects');
+    const pos = maxPos ? maxPos.m + 1 : 0;
+    dbRun('INSERT INTO projects (name, details, goals, time_frame, road_map, position) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, details || '', goals || '', time_frame || '', road_map || '', pos]);
     const id = getLastInsertId();
     return dbGet('SELECT * FROM projects WHERE id = ?', [id]);
 });
@@ -367,6 +389,56 @@ ipcMain.handle('db:update-project', (event, { id, name, details, goals, time_fra
 
 ipcMain.handle('db:delete-project', (event, id) => {
     dbRun('DELETE FROM projects WHERE id = ?', [id]);
+    return { success: true };
+});
+
+ipcMain.handle('db:get-all-notes', () => {
+    return dbAll('SELECT * FROM notes ORDER BY position, id DESC');
+});
+
+ipcMain.handle('db:create-note', (event, { title, content }) => {
+    const maxPos = dbGet('SELECT COALESCE(MAX(position), -1) as m FROM notes');
+    const pos = maxPos ? maxPos.m + 1 : 0;
+    dbRun('INSERT INTO notes (title, content, position) VALUES (?, ?, ?)', [title, content || '', pos]);
+    const id = getLastInsertId();
+    return dbGet('SELECT * FROM notes WHERE id = ?', [id]);
+});
+
+ipcMain.handle('db:update-note', (event, { id, title, content }) => {
+    const updates = [];
+    const values = [];
+    if (title !== undefined) { updates.push('title = ?'); values.push(title); }
+    if (content !== undefined) { updates.push('content = ?'); values.push(content); }
+    if (updates.length > 0) {
+        values.push(id);
+        dbRun(`UPDATE notes SET ${updates.join(', ')} WHERE id = ?`, values);
+    }
+    return dbGet('SELECT * FROM notes WHERE id = ?', [id]);
+});
+
+ipcMain.handle('db:delete-note', (event, id) => {
+    dbRun('DELETE FROM notes WHERE id = ?', [id]);
+    return { success: true };
+});
+
+ipcMain.handle('db:reorder-tasks', (event, orderedIds) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+        dbRun('UPDATE tasks SET position = ? WHERE id = ?', [i, orderedIds[i]]);
+    }
+    return { success: true };
+});
+
+ipcMain.handle('db:reorder-projects', (event, orderedIds) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+        dbRun('UPDATE projects SET position = ? WHERE id = ?', [i, orderedIds[i]]);
+    }
+    return { success: true };
+});
+
+ipcMain.handle('db:reorder-notes', (event, orderedIds) => {
+    for (let i = 0; i < orderedIds.length; i++) {
+        dbRun('UPDATE notes SET position = ? WHERE id = ?', [i, orderedIds[i]]);
+    }
     return { success: true };
 });
 
