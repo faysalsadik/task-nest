@@ -271,10 +271,14 @@ ipcMain.handle('get-auto-start', () => {
 });
 
 ipcMain.handle('set-auto-start', (event, enable) => {
-    app.setLoginItemSettings({
+    const settings = {
         openAtLogin: enable,
         path: process.execPath
-    });
+    };
+    if (!app.isPackaged) {
+        settings.args = [path.resolve(process.argv[1] || __dirname)];
+    }
+    app.setLoginItemSettings(settings);
     return enable;
 });
 
